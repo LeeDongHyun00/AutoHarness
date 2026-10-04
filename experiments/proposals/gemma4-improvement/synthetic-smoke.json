@@ -1,0 +1,48 @@
+{
+  "task": "공개 합성 예제: README의 검증 절차를 읽는 계획을 반환하세요. 파일을 변경하지 마세요.",
+  "file_catalog": {
+    "DOC": "docs/demo.md",
+    "TEST": "tests/test_demo.py"
+  },
+  "response_schema": {
+    "type": "object",
+    "properties": {
+      "plan": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 4,
+        "items": {
+          "type": "object",
+          "properties": {
+            "file_id": {
+              "type": "string"
+            },
+            "action": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "file_id",
+            "action"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "plan"
+    ],
+    "additionalProperties": false
+  },
+  "public_good_response": {
+    "plan": [
+      {
+        "file_id": "DOC",
+        "action": "Read the documented verification steps."
+      }
+    ]
+  },
+  "note": "New synthetic example only; no original evaluation item or private oracle."
+}

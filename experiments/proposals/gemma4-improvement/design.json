@@ -1,0 +1,116 @@
+{
+  "status": "NOT_RUN",
+  "model": {
+    "repo": "google/gemma-4-12B-it-qat-q4_0-gguf",
+    "revision": "29d097773436b69ff9feafd636ab4cf873786537",
+    "llama_cpp_tag": "b11382",
+    "llama_cpp_commit": "11fe02151f79c41d0d4af7da708755d73b9c0da6",
+    "lora": [],
+    "temperature": 0,
+    "seed": 104,
+    "context": 4096,
+    "max_tokens": 768,
+    "cache_prompt": false,
+    "response_format": null,
+    "grammar": null,
+    "thinking": false,
+    "reasoning_budget": 0,
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    },
+    "model_file_sha256": null,
+    "tokenizer_preflight": "not_run"
+  },
+  "design": "paired 2x2x2 factorial",
+  "factors": [
+    "json_schema",
+    "file_id_validation",
+    "bounded_repair"
+  ],
+  "arms": [
+    {
+      "id": "J0F0R0",
+      "json_schema": false,
+      "file_id_validation": false,
+      "bounded_repair": false
+    },
+    {
+      "id": "J0F0R1",
+      "json_schema": false,
+      "file_id_validation": false,
+      "bounded_repair": true
+    },
+    {
+      "id": "J0F1R0",
+      "json_schema": false,
+      "file_id_validation": true,
+      "bounded_repair": false
+    },
+    {
+      "id": "J0F1R1",
+      "json_schema": false,
+      "file_id_validation": true,
+      "bounded_repair": true
+    },
+    {
+      "id": "J1F0R0",
+      "json_schema": true,
+      "file_id_validation": false,
+      "bounded_repair": false
+    },
+    {
+      "id": "J1F0R1",
+      "json_schema": true,
+      "file_id_validation": false,
+      "bounded_repair": true
+    },
+    {
+      "id": "J1F1R0",
+      "json_schema": true,
+      "file_id_validation": true,
+      "bounded_repair": false
+    },
+    {
+      "id": "J1F1R1",
+      "json_schema": true,
+      "file_id_validation": true,
+      "bounded_repair": true
+    }
+  ],
+  "budget": {
+    "context_tokens": 4096,
+    "initial_output_tokens": 384,
+    "repair_output_tokens": 384,
+    "total_output_tokens_max": 768,
+    "calls_max": 2,
+    "repairs_max": 1,
+    "temperature": 0,
+    "seed": 104,
+    "wall_seconds_cap": 120,
+    "input_tokens_total_cap": 6656,
+    "retries_on_infrastructure_failure": 0
+  },
+  "population": {
+    "regression": "existing exposed 216 requests; external storage only",
+    "fresh_holdout": {
+      "status": "NOT_PREPARED",
+      "families": null,
+      "projects": null,
+      "storage_ref": null,
+      "access_boundary_verified": false
+    }
+  },
+  "success_criteria": {
+    "primary": "paired family-level strict-task success improvement >= 0.10 over J0F0R0 and lower 95% family-cluster bootstrap bound > 0 on independent holdout",
+    "safety": "zero accepted unknown file IDs or out-of-root paths; zero host execution",
+    "semantic_noninferiority_margin": 0.02,
+    "latency_ratio_max": 1.5,
+    "token_ratio_max": 1.5,
+    "inference_rule": "insufficient independent families or missing holdout => inconclusive; no superiority claim from regression alone"
+  },
+  "results": null,
+  "engine_json_schema_support": "NOT_VERIFIED",
+  "repair_feedback": "public independent contract checks only; no hidden oracle/test details",
+  "training_lora": "OUT_OF_SCOPE",
+  "downstream_harness_execution": "FOLLOW_UP_NOT_RUN"
+}
