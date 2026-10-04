@@ -1,0 +1,843 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AutoHarness experiment provenance manifest",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "planned",
+        "running",
+        "completed",
+        "interrupted",
+        "failed"
+      ]
+    },
+    "created_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "code": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "type": "string"
+        },
+        "commit": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{40,64}$"
+        },
+        "branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "head_state": {
+          "enum": [
+            "unborn",
+            "commit",
+            "detached"
+          ]
+        },
+        "dirty": {
+          "type": "boolean"
+        },
+        "source_snapshot": {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "bytes": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "access": {
+              "enum": [
+                "public",
+                "owner_only",
+                "evaluator_only"
+              ]
+            }
+          },
+          "required": [
+            "ref",
+            "sha256",
+            "bytes",
+            "access"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "repository",
+        "commit",
+        "branch",
+        "head_state",
+        "dirty",
+        "source_snapshot"
+      ],
+      "additionalProperties": false
+    },
+    "model": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "filename": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "adapters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sha256": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "bytes": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "access": {
+                "enum": [
+                  "public",
+                  "owner_only",
+                  "evaluator_only"
+                ]
+              }
+            },
+            "required": [
+              "ref",
+              "sha256",
+              "bytes",
+              "access"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "repository",
+        "revision",
+        "filename",
+        "sha256",
+        "adapters"
+      ],
+      "additionalProperties": false
+    },
+    "inputs": {
+      "type": "object",
+      "properties": {
+        "dataset": {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "bytes": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "access": {
+              "enum": [
+                "public",
+                "owner_only",
+                "evaluator_only"
+              ]
+            }
+          },
+          "required": [
+            "ref",
+            "sha256",
+            "bytes",
+            "access"
+          ],
+          "additionalProperties": false
+        },
+        "prompts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sha256": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "bytes": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "access": {
+                "enum": [
+                  "public",
+                  "owner_only",
+                  "evaluator_only"
+                ]
+              }
+            },
+            "required": [
+              "ref",
+              "sha256",
+              "bytes",
+              "access"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "harnesses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sha256": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "bytes": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "access": {
+                "enum": [
+                  "public",
+                  "owner_only",
+                  "evaluator_only"
+                ]
+              }
+            },
+            "required": [
+              "ref",
+              "sha256",
+              "bytes",
+              "access"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "configurations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "sha256": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "bytes": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "access": {
+                "enum": [
+                  "public",
+                  "owner_only",
+                  "evaluator_only"
+                ]
+              }
+            },
+            "required": [
+              "ref",
+              "sha256",
+              "bytes",
+              "access"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "evaluator": {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "bytes": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "access": {
+              "enum": [
+                "public",
+                "owner_only",
+                "evaluator_only"
+              ]
+            }
+          },
+          "required": [
+            "ref",
+            "sha256",
+            "bytes",
+            "access"
+          ],
+          "additionalProperties": false
+        },
+        "hidden_evaluation_access": {
+          "const": "separate_authorization_required"
+        }
+      },
+      "required": [
+        "dataset",
+        "prompts",
+        "harnesses",
+        "configurations",
+        "evaluator",
+        "hidden_evaluation_access"
+      ],
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "platform": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "os": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "python": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gpus": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "memory_mib": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              }
+            },
+            "required": [
+              "name",
+              "memory_mib"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "driver": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cuda_toolkit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "engine": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "version": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "commit": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9a-f]{40,64}$"
+            },
+            "binary_sha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "build_options": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "name",
+            "version",
+            "commit",
+            "binary_sha256",
+            "build_options"
+          ],
+          "additionalProperties": false
+        },
+        "template_tokenizer_preflight": {
+          "enum": [
+            "not_run",
+            "passed",
+            "failed"
+          ]
+        }
+      },
+      "required": [
+        "platform",
+        "os",
+        "python",
+        "gpus",
+        "driver",
+        "cuda_toolkit",
+        "engine",
+        "template_tokenizer_preflight"
+      ],
+      "additionalProperties": false
+    },
+    "generation": {
+      "type": "object",
+      "properties": {
+        "seed": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "temperature": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "context_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "max_output_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "enable_thinking": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "reasoning_budget": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": -1
+        }
+      },
+      "required": [
+        "seed",
+        "temperature",
+        "context_tokens",
+        "max_output_tokens",
+        "enable_thinking",
+        "reasoning_budget"
+      ],
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "planned": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "completed": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "failed": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "ambiguous": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      },
+      "required": [
+        "planned",
+        "completed",
+        "failed",
+        "ambiguous"
+      ],
+      "additionalProperties": false
+    },
+    "usage": {
+      "type": "object",
+      "properties": {
+        "input_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "output_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "wall_seconds": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      },
+      "required": [
+        "input_tokens",
+        "output_tokens",
+        "wall_seconds"
+      ],
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "numerator": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "denominator": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "population": {
+            "type": "string"
+          },
+          "analysis_stage": {
+            "enum": [
+              "prespecified_raw",
+              "posthoc_diagnostic"
+            ]
+          },
+          "transform": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "unassessed": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "numerator",
+          "denominator",
+          "population",
+          "analysis_stage",
+          "transform",
+          "unassessed",
+          "value",
+          "unit"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "raw_results": {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "bytes": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "access": {
+              "enum": [
+                "public",
+                "owner_only",
+                "evaluator_only"
+              ]
+            }
+          },
+          "required": [
+            "ref",
+            "sha256",
+            "bytes",
+            "access"
+          ],
+          "additionalProperties": false
+        },
+        "checkpoint": {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sha256": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "bytes": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "access": {
+              "enum": [
+                "public",
+                "owner_only",
+                "evaluator_only"
+              ]
+            }
+          },
+          "required": [
+            "ref",
+            "sha256",
+            "bytes",
+            "access"
+          ],
+          "additionalProperties": false
+        },
+        "lightweight_summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "raw_results",
+        "checkpoint",
+        "lightweight_summary"
+      ],
+      "additionalProperties": false
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "run_id",
+    "status",
+    "created_at",
+    "code",
+    "model",
+    "inputs",
+    "runtime",
+    "generation",
+    "coverage",
+    "usage",
+    "metrics",
+    "artifacts",
+    "limitations"
+  ],
+  "additionalProperties": false
+}

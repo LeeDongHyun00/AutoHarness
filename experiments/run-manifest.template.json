@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "run_id": "REPLACE_WITH_UNIQUE_RUN_ID",
+  "status": "planned",
+  "created_at": null,
+  "code": {
+    "repository": "https://github.com/LeeDongHyun00/AutoHarness",
+    "commit": null,
+    "branch": "work",
+    "head_state": "unborn",
+    "dirty": true,
+    "source_snapshot": {
+      "ref": null,
+      "sha256": null,
+      "bytes": null,
+      "access": "owner_only"
+    }
+  },
+  "model": {
+    "repository": null,
+    "revision": null,
+    "filename": null,
+    "sha256": null,
+    "adapters": []
+  },
+  "inputs": {
+    "dataset": {
+      "ref": null,
+      "sha256": null,
+      "bytes": null,
+      "access": "owner_only"
+    },
+    "prompts": [],
+    "harnesses": [],
+    "configurations": [],
+    "evaluator": {
+      "ref": null,
+      "sha256": null,
+      "bytes": null,
+      "access": "owner_only"
+    },
+    "hidden_evaluation_access": "separate_authorization_required"
+  },
+  "runtime": {
+    "platform": null,
+    "os": null,
+    "python": null,
+    "gpus": [],
+    "driver": null,
+    "cuda_toolkit": null,
+    "engine": {
+      "name": null,
+      "version": null,
+      "commit": null,
+      "binary_sha256": null,
+      "build_options": []
+    },
+    "template_tokenizer_preflight": "not_run"
+  },
+  "generation": {
+    "seed": null,
+    "temperature": null,
+    "context_tokens": null,
+    "max_output_tokens": null,
+    "enable_thinking": null,
+    "reasoning_budget": null
+  },
+  "coverage": {
+    "planned": null,
+    "completed": null,
+    "failed": null,
+    "ambiguous": null
+  },
+  "usage": {
+    "input_tokens": null,
+    "output_tokens": null,
+    "wall_seconds": null
+  },
+  "metrics": [],
+  "artifacts": {
+    "raw_results": {
+      "ref": null,
+      "sha256": null,
+      "bytes": null,
+      "access": "owner_only"
+    },
+    "checkpoint": {
+      "ref": null,
+      "sha256": null,
+      "bytes": null,
+      "access": "owner_only"
+    },
+    "lightweight_summary": null
+  },
+  "limitations": [
+    "Template only; no inference performed.",
+    "Folder/branch/ignore rules are not a hidden-evaluation access boundary."
+  ]
+}

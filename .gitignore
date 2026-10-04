@@ -1,0 +1,40 @@
+# Local credentials: ignore rules do not protect files already tracked by Git.
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+.aws/
+.credentials/
+secrets/
+
+# Model weights and training checkpoints live outside Git.
+models/
+checkpoints/
+*.gguf
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.onnx
+
+# Local experiment payloads, raw outputs and restricted evaluation material.
+# Ignoring a directory is NOT an access-control boundary.
+experiments/local/
+experiments/runs/*/raw/
+experiments/runs/*/checkpoints/
+raw-results/
+raw-responses/
+private-eval/
+artifacts/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# Reproducible environment caches and notebook checkpoint copies.
+.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
