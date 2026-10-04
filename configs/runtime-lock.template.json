@@ -1,0 +1,15 @@
+{
+  "repo": "google/gemma-4-12B-it-qat-q4_0-gguf",
+  "revision": "29d097773436b69ff9feafd636ab4cf873786537",
+  "llama_commit": "11fe02151f79c41d0d4af7da708755d73b9c0da6",
+  "context": 4096,
+  "lora": [],
+  "thinking": false,
+  "reasoning_budget": 0,
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  },
+  "model_sha256": null,
+  "server_sha256": null,
+  "server_version": null
+}

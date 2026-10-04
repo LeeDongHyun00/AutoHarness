@@ -1,0 +1,23 @@
+{
+  "case_id": "public-demo-count",
+  "instruction": "data.values 원소 개수를 JSON의 count로 반환하세요.",
+  "data": {
+    "values": [
+      "blue",
+      "green",
+      "amber"
+    ]
+  },
+  "response_schema": {
+    "type": "object",
+    "properties": {
+      "count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "count"
+    ],
+    "additionalProperties": false
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "status": "completed_reported",
+  "evidence": "User-provided final aggregate; raw final archive not available or rehashed in this migration. Local v1.1 preparation code inspected.",
+  "original_run_commit": null,
+  "original_run_id": null,
+  "archive": {
+    "filename": "AutoHarness-Gemma4-baseline-results-2026-10-04.zip",
+    "sha256": "7e79bb6d94da772c04b2e02d70e1d647ac1e78355c0d657e8255a47f817acb67",
+    "sha256_source": "user_report",
+    "verified_locally": false,
+    "ref": null
+  },
+  "model": {
+    "repository": "google/gemma-4-12B-it-qat-q4_0-gguf",
+    "revision": "29d097773436b69ff9feafd636ab4cf873786537",
+    "file_sha256": null,
+    "lora": []
+  },
+  "runtime": {
+    "engine": "llama.cpp",
+    "version": "b11382",
+    "commit": "11fe02151f79c41d0d4af7da708755d73b9c0da6",
+    "gpus": [
+      "T4",
+      "T4"
+    ],
+    "driver": null,
+    "model_binary_sha256": null,
+    "server_binary_sha256": null
+  },
+  "generation": {
+    "context_tokens": 4096,
+    "temperature": 0,
+    "seed": 104,
+    "max_output_tokens": 768,
+    "thinking": false
+  },
+  "coverage": {
+    "cases": 72,
+    "independent_families": 24,
+    "prompt_layouts": 3,
+    "requests": 216,
+    "completed": 216,
+    "finish_stop": 216,
+    "cutoff": 0
+  },
+  "metrics": [
+    {
+      "name": "raw_strict_json",
+      "numerator": 0,
+      "denominator": 216,
+      "analysis_stage": "prespecified_raw",
+      "transform": null
+    },
+    {
+      "name": "semantic",
+      "numerator": 128,
+      "denominator": 162,
+      "analysis_stage": "posthoc_diagnostic",
+      "transform": "outer fence removal only"
+    },
+    {
+      "name": "code_all_hidden_tests",
+      "numerator": 11,
+      "denominator": 18,
+      "analysis_stage": "posthoc_diagnostic",
+      "transform": "outer fence removal only"
+    },
+    {
+      "name": "harness_usefulness",
+      "mean": 0.889,
+      "scale_max": 2,
+      "denominator": 36,
+      "analysis_stage": "human_style_LLM_review",
+      "raters": 2,
+      "dimension_adjudications": 10
+    },
+    {
+      "name": "bad_adversarial_plans",
+      "numerator": 6,
+      "denominator": 36,
+      "population": "all generated harness plans"
+    }
+  ],
+  "usage": {
+    "input_tokens": 56565,
+    "output_tokens": 18825,
+    "wall_seconds": 847.391,
+    "wall_excludes_setup": true
+  },
+  "limitations": [
+    "All raw responses were code fenced.",
+    "216 requests are repeated conditions/layouts over 24 independent families, not 216 independent samples.",
+    "Existing items are regression data, not a fresh sealed holdout.",
+    "Posthoc fence removal does not repair raw contract compliance.",
+    "Semantic/code populations differ and must not be pooled.",
+    "Harness plans were reviewed, not executed end-to-end.",
+    "Restricted AST code checks do not establish arbitrary code or downstream repository capability.",
+    "Original questions, hidden tests, mappings and raw responses remain outside Git.",
+    "Reported aggregates were transcribed and consistency-checked, not recomputed from raw artifacts."
+  ]
+}

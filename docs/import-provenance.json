@@ -1,0 +1,48 @@
+{
+  "source_package": "local v1.1 preparation package",
+  "raw_results_archive_verified_locally": false,
+  "files": [
+    {
+      "source": "tools/colab_run.py",
+      "source_sha256": "04478f8b519b77388615a15b1f469a1655ebcfcaf2902a998467248436c59a74",
+      "destination": "tools/gemma4/runner.py",
+      "matches_source_package_manifest": true,
+      "destination_sha256": "04478f8b519b77388615a15b1f469a1655ebcfcaf2902a998467248436c59a74"
+    },
+    {
+      "source": "tools/safe_expr.py",
+      "source_sha256": "1d4277e8a8fe6f58142318b70786e85ba6de8dd89148528624bc5e7fe5c51971",
+      "destination": "tools/gemma4/safe_expr.py",
+      "matches_source_package_manifest": true,
+      "destination_sha256": "1d4277e8a8fe6f58142318b70786e85ba6de8dd89148528624bc5e7fe5c51971"
+    },
+    {
+      "source": "tools/evaluator.py",
+      "source_sha256": "65507248be500661dea44ff4d731fcf0c3d29391f092f62bb3071a664481fb87",
+      "destination": "tools/gemma4/evaluator.py",
+      "matches_source_package_manifest": true,
+      "destination_sha256": "df2cbc5ca4c1c5eb1601572881324da4a48491f4da91a7a80faec97fb76d94d3"
+    },
+    {
+      "source": "public/prompt_variants.json",
+      "source_sha256": "f67e246c0791731ef95c90067bb92d59d4ad59261085db4d100185edaa7efba0",
+      "destination": "prompts/gemma4-layouts.json",
+      "matches_source_package_manifest": true,
+      "destination_sha256": "f67e246c0791731ef95c90067bb92d59d4ad59261085db4d100185edaa7efba0"
+    },
+    {
+      "source": "requirements-offline.txt",
+      "source_sha256": "756cc9e506ae4ee1a6f6c0507088b5cfc0dc8ba350fb2d2d46f1ffa72033adb6",
+      "destination": "requirements-offline.txt",
+      "matches_source_package_manifest": true,
+      "destination_sha256": "756cc9e506ae4ee1a6f6c0507088b5cfc0dc8ba350fb2d2d46f1ffa72033adb6"
+    }
+  ],
+  "adaptations": [
+    "Evaluator accepts explicit case/oracle; no bundled lookup or private paths.",
+    "Summary family count derives from caller plan.",
+    "Runner and AST interpreter copied unchanged.",
+    "Notebooks adapted to repository code and externally supplied payload, default confirmations false.",
+    "Payload builder extracts generic A/B/C rendering; includes only new public synthetic case."
+  ]
+}

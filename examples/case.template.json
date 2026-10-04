@@ -1,0 +1,8 @@
+{
+  "case_id": "REPLACE_WITH_UNIQUE_ID",
+  "instruction": "REPLACE_WITH_TASK",
+  "data": {},
+  "response_schema": {
+    "type": "object"
+  }
+}

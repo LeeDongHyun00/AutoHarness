@@ -1,0 +1,21 @@
+{
+  "repo": "google/gemma-4-12B-it-qat-q4_0-gguf",
+  "revision": "29d097773436b69ff9feafd636ab4cf873786537",
+  "llama_cpp_tag": "b11382",
+  "llama_cpp_commit": "11fe02151f79c41d0d4af7da708755d73b9c0da6",
+  "lora": [],
+  "temperature": 0,
+  "seed": 104,
+  "context": 4096,
+  "max_tokens": 768,
+  "cache_prompt": false,
+  "response_format": null,
+  "grammar": null,
+  "thinking": false,
+  "reasoning_budget": 0,
+  "chat_template_kwargs": {
+    "enable_thinking": false
+  },
+  "model_file_sha256": null,
+  "tokenizer_preflight": "not_run"
+}
