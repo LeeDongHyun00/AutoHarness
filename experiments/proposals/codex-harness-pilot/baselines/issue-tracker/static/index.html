@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Issues</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 id="project-name">Issues</h1>
+    <label class="acting-user">User ID
+      <input id="acting-user" type="number" min="1" inputmode="numeric">
+    </label>
+    <span id="user-name" class="muted"></span>
+  </header>
+  <main>
+    <section class="toolbar" aria-label="Issue filters">
+      <label for="status-filter">Status</label>
+      <select id="status-filter" name="status">
+        <option value="">All</option>
+        <option value="open">Open</option>
+        <option value="in_progress">In progress</option>
+        <option value="done">Done</option>
+      </select>
+      <label for="sort-order">Sort</label>
+      <select id="sort-order" name="sort">
+        <option value="created-desc">Newest first</option>
+        <option value="created-asc">Oldest first</option>
+        <option value="title-asc">Title A–Z</option>
+      </select>
+    </section>
+    <p id="list-message" class="message" role="status" hidden></p>
+    <ul id="issue-list" class="issue-list"></ul>
+
+    <section class="card" aria-labelledby="new-issue-heading">
+      <h2 id="new-issue-heading">New issue</h2>
+      <form id="new-issue-form" novalidate>
+        <label for="new-title">Title</label>
+        <input id="new-title" name="title" maxlength="200" required>
+        <label for="new-description">Description</label>
+        <textarea id="new-description" name="description" rows="3"></textarea>
+        <p id="form-message" class="message error" role="alert" hidden></p>
+        <button type="submit">Create issue</button>
+      </form>
+    </section>
+  </main>
+  <script type="module" src="/list.js"></script>
+</body>
+</html>

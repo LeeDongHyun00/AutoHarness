@@ -1,0 +1,27 @@
+:root {
+  --text: #202124;
+  --muted: #5f6368;
+  --line: #dadce0;
+  --link: #1a73e8;
+  --danger: #c5221f;
+  --ok: #188038;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--text);
+  background: #fff;
+}
+
+body { margin: 0; }
+.page { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+.muted { color: var(--muted); }
+.event-list { list-style: none; padding: 0; }
+.event-card { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+.event-card a { font-weight: 600; color: var(--link); }
+.seats { font-weight: 500; }
+.signup-form { border-top: 1px solid var(--line); margin-top: 24px; padding-top: 8px; }
+.field { margin-bottom: 12px; }
+.field label { display: block; margin-bottom: 4px; }
+.field input, .field textarea { width: 100%; box-sizing: border-box; padding: 8px; }
+.field-error, .form-error { color: var(--danger); margin: 4px 0 0; }
+.confirmation { margin-top: 24px; padding: 16px; border: 1px solid var(--ok); border-radius: 8px; }
+button { padding: 8px 16px; }
+button:disabled { opacity: 0.6; }

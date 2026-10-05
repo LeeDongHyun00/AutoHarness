@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your registration</title>
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body>
+  <main class="page">
+    <a href="/">← All events</a>
+    <p id="registration-status" role="status" hidden></p>
+    <section id="registration" hidden>
+      <h1 id="registration-event"></h1>
+      <p>Status: <strong id="registration-state"></strong></p>
+      <p id="registration-position" hidden></p>
+      <button id="cancel-button" type="button">Cancel registration</button>
+      <p id="cancel-error" class="form-error" role="alert" hidden></p>
+    </section>
+  </main>
+  <script type="module" src="/registration.js"></script>
+</body>
+</html>

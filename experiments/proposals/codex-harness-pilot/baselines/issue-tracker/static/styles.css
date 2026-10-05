@@ -1,0 +1,32 @@
+:root {
+  --fg: #1f2328;
+  --muted: #59636e;
+  --border: #d1d9e0;
+  --bg: #ffffff;
+  --accent: #0969da;
+  --error: #cf222e;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+}
+
+body { margin: 0; }
+main { max-width: 860px; margin: 0 auto; padding: 16px; }
+.topbar { display: flex; gap: 16px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.topbar h1 { font-size: 1.25rem; margin: 0; flex: 1; }
+.toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.issue-list { list-style: none; padding: 0; margin: 0 0 24px; }
+.issue { display: flex; gap: 12px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.issue a { color: var(--accent); flex: 1; }
+.muted { color: var(--muted); font-size: 0.875rem; }
+.badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
+.card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+form label { display: block; margin-top: 8px; }
+form input, form textarea, form select { width: 100%; box-sizing: border-box; padding: 6px; }
+.inline-form { display: flex; gap: 8px; align-items: center; }
+.inline-form label { margin: 0; }
+.inline-form select { width: auto; }
+button { margin-top: 12px; padding: 6px 14px; }
+.inline-form button { margin-top: 0; }
+.message { margin: 8px 0; }
+.message.error { color: var(--error); }

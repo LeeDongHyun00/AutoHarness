@@ -1,0 +1,64 @@
+{
+  "schema_version": "0.1",
+  "status": "draft_not_frozen",
+  "access_note": "Evaluator-side material. It names the intended defects, so it must never be copied into an exported baseline, a harness-generator input or a Codex workspace. Move it to the private evaluator repository once D4 is decided; a folder in this repository is not an access boundary.",
+  "export_tool": "experiments/proposals/codex-harness-pilot/export_baseline.py",
+  "projects": {
+    "issue-tracker": {
+      "exported_commit": "f7d9a0dc2b89c93e30e20ff8758928d57bf7fc3b",
+      "public_tests": {"command": "python -m unittest discover -s tests -v", "baseline_result": "28 passed"},
+      "unrelated_known_failures": [],
+      "intended_targets": [
+        {
+          "task_id": "IT-FE",
+          "kind": "bug",
+          "symptom": "Filter and sort changes are pushed to the URL, but the list page ignores status/sort query parameters on load and has no popstate handler, so reload, back/forward and direct links show the default filters.",
+          "location": "static/list.js (init, no popstate listener)",
+          "precheck": "probe_ui.py: after selecting status=open and reloading, URL keeps status=open but the control is '' and 7 issues are listed"
+        },
+        {
+          "task_id": "IT-BE",
+          "kind": "bug",
+          "symptom": "ALLOWED_TRANSITIONS lets open move straight to done, contradicting the README lifecycle (open -> in_progress -> done).",
+          "location": "app/service.py ALLOWED_TRANSITIONS",
+          "precheck": "probe_backend.py: change_status open->done returns done"
+        },
+        {
+          "task_id": "IT-INT",
+          "kind": "missing_feature",
+          "symptom": "Issues have no assignee: no column, API field or UI.",
+          "location": "app/schema.sql, app/service.py, app/repository.py, static/",
+          "precheck": "by inspection"
+        }
+      ]
+    },
+    "event-signup": {
+      "exported_commit": "774bc9ae64ef16ad15718892c8a2eb2b32fc66ca",
+      "public_tests": {"command": "python -m unittest discover -s tests -v", "baseline_result": "22 passed"},
+      "unrelated_known_failures": [],
+      "intended_targets": [
+        {
+          "task_id": "EV-FE",
+          "kind": "bug",
+          "symptom": "On a failed signup the form is cleared (form.reset() in finally) and the submit button stays disabled, so the user cannot retry without reloading.",
+          "location": "static/event.js submit handler",
+          "precheck": "probe_ui.py: injected 503 leaves all four fields empty and the button disabled"
+        },
+        {
+          "task_id": "EV-BE",
+          "kind": "bug",
+          "symptom": "register() counts confirmed seats and inserts in separate statements outside a write transaction, so concurrent signups can overfill an event.",
+          "location": "app/registrations.py register, app/store.py count_confirmed/insert_registration",
+          "precheck": "probe_backend.py: two signups interleaved after count_confirmed on a capacity-1 event both end confirmed"
+        },
+        {
+          "task_id": "EV-INT",
+          "kind": "missing_feature",
+          "symptom": "Cancelling a confirmed registration frees the seat but does not promote anyone from the waitlist.",
+          "location": "app/registrations.py cancel",
+          "precheck": "probe_backend.py: after cancelling rust-workshop's confirmed seat, the first waitlisted registration stays waitlisted"
+        }
+      ]
+    }
+  }
+}
