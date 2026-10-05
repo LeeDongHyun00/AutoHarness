@@ -1,0 +1,32 @@
+# Requirements for IT-BE. Values are fixed for the pilot; private check ids name
+# evaluator-only checks that live outside this repository.
+task_id: IT-BE
+project: issue-tracker
+area: backend
+change_type: bug
+request: request.ko.md
+precondition: exported baseline commit (see baselines/README.ko.md), fresh seeded database, APP_NOW pinned
+public_command: "python tools/check_public.py"
+private_command: "python grade.py --task IT-BE --submission SUBMISSION_DIR --private-dir PRIVATE_DIR"
+private_check: IT-BE-H1
+timeout_seconds:
+  per_check: 120
+  ui_assertion: 10
+  app_startup: 15
+  regression_suite: 120
+regression_checks: [REG-tests]
+known_baseline_failures:
+  - "IT-FE and IT-INT targets are present in the same baseline"
+requirements:
+  - requirement_id: IT-BE-1
+    requirement_source: existing_contract
+    input: "PATCH status along and against the lifecycle"
+    expected_observable_output: "open->in_progress and in_progress->done return 200 and persist; all other changes return 409 code=conflict with no change; same status returns 200 unchanged"
+  - requirement_id: IT-BE-2
+    requirement_source: existing_contract
+    input: "unknown status, missing issue, viewer/non-member/unauthenticated callers"
+    expected_observable_output: "400 / 404 / 403 / 401 respectively; issue unchanged"
+  - requirement_id: REG-tests
+    requirement_source: existing_contract
+    input: "original baseline tests/ copied over the submission"
+    expected_observable_output: "python -m unittest discover -s tests passes"

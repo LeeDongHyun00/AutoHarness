@@ -1,0 +1,168 @@
+{
+  "checked_at": "2026-10-05T03:02:11+00:00",
+  "results": [
+    {
+      "task": "IT-FE",
+      "baseline_commit": "f7d9a0dc2b89c93e30e20ff8758928d57bf7fc3b",
+      "red": true,
+      "red_target_failures": [
+        "IT-FE-1",
+        "IT-FE-2"
+      ],
+      "red_non_assertion_statuses": [],
+      "green": true,
+      "green_non_pass": [],
+      "red_detail": {
+        "REG-tests original baseline test suite passes": "pass",
+        "IT-FE-1 status=open + sort=created-asc survives a reload": "fail",
+        "IT-FE-2 back and forward restore each history entry": "fail",
+        "IT-FE-2 direct links apply filters; unknown values fall back to defaults": "fail",
+        "IT-FE-REG issue links, empty results and project parameter still work": "pass",
+        "PRIVATE (titles withheld)": {
+          "fail": 3
+        }
+      },
+      "grader_files_sha256": {
+        "lib.py": "9476603644862611c6dd915424a2ccb33260a6eb7c953d89e9f5e12179df4c3d",
+        "public_checks.py": "513b7bc1077a837fd99c848eb1593c9ec16512e0ff8cbb91831cbef86750f1e3",
+        "private_checks.py": "22f89554eb58c648ac74351a9a251cbe4a2032f309f881e034c016ca98f30afb"
+      }
+    },
+    {
+      "task": "IT-BE",
+      "baseline_commit": "f7d9a0dc2b89c93e30e20ff8758928d57bf7fc3b",
+      "red": true,
+      "red_target_failures": [
+        "IT-BE-1"
+      ],
+      "red_non_assertion_statuses": [],
+      "green": true,
+      "green_non_pass": [],
+      "red_detail": {
+        "REG-tests original baseline test suite passes": "pass",
+        "IT-BE-1 open -> in_progress -> done succeeds and is stored": "pass",
+        "IT-BE-1 open -> done is rejected with 409 conflict and the issue stays open": "fail",
+        "IT-BE-1 requesting the current status succeeds without changes": "pass",
+        "IT-BE-2 unknown status is 400 and missing issue is 404, nothing changes": "pass",
+        "IT-BE-2 viewer cannot change status (403) and nothing changes": "pass",
+        "PRIVATE (titles withheld)": {
+          "fail": 2,
+          "pass": 1
+        }
+      },
+      "grader_files_sha256": {
+        "lib.py": "9476603644862611c6dd915424a2ccb33260a6eb7c953d89e9f5e12179df4c3d",
+        "public_checks.py": "7f1cddb7cfd7c99f045828cde5da61defc5cbb8de1938b29e4d5e0b7f61fc034",
+        "private_checks.py": "565c772a8671db7a9e13d77b5122f849a0a5ddfcfd5edc4f0c21e9b9f149c2ec"
+      }
+    },
+    {
+      "task": "IT-INT",
+      "baseline_commit": "f7d9a0dc2b89c93e30e20ff8758928d57bf7fc3b",
+      "red": true,
+      "red_target_failures": [
+        "IT-INT-1",
+        "IT-INT-2"
+      ],
+      "red_non_assertion_statuses": [],
+      "green": true,
+      "green_non_pass": [],
+      "red_detail": {
+        "REG-tests original baseline test suite passes": "pass",
+        "IT-INT-1 member assigns an active project member; list, detail and restart agree": "fail",
+        "IT-INT-1 detail page assigns and the list shows the name after reload": "fail",
+        "IT-INT-2 unassign works; invalid assignees are 400 and change nothing": "fail",
+        "IT-INT-2 viewer cannot assign (403) and nothing changes": "fail",
+        "PRIVATE (titles withheld)": {
+          "fail": 4
+        }
+      },
+      "grader_files_sha256": {
+        "lib.py": "9476603644862611c6dd915424a2ccb33260a6eb7c953d89e9f5e12179df4c3d",
+        "public_checks.py": "61d62ed44290534d98c42a945ec48b15c9db4c3bd04092062b472e630125810f",
+        "private_checks.py": "594682a090ffb7381967f70da6a6b3d4ae01e340b459017358fab51de9a2ad35"
+      }
+    },
+    {
+      "task": "EV-FE",
+      "baseline_commit": "774bc9ae64ef16ad15718892c8a2eb2b32fc66ca",
+      "red": true,
+      "red_target_failures": [
+        "EV-FE-1",
+        "EV-FE-2"
+      ],
+      "red_non_assertion_statuses": [],
+      "green": true,
+      "green_non_pass": [],
+      "red_detail": {
+        "REG-tests original baseline test suite passes": "pass",
+        "EV-FE-1 a 503 keeps every value, shows an error and re-enables the button": "fail",
+        "EV-FE-2 retry after a failure sends the kept values and succeeds": "fail",
+        "EV-FE-2 extra clicks while a request is pending send no extra request": "pass",
+        "EV-FE-REG client-side validation still blocks an empty name without a request": "pass",
+        "PRIVATE (titles withheld)": {
+          "fail": 3
+        }
+      },
+      "grader_files_sha256": {
+        "lib.py": "9476603644862611c6dd915424a2ccb33260a6eb7c953d89e9f5e12179df4c3d",
+        "public_checks.py": "ea034297fd839bc5abe17ae282210be9698a6fa2c4cf5379b3ca425cdd59e31e",
+        "private_checks.py": "6898b46d9a651c9f405c0104f1a9b08484be7dfbf213b78d4540da614560d880"
+      }
+    },
+    {
+      "task": "EV-BE",
+      "baseline_commit": "774bc9ae64ef16ad15718892c8a2eb2b32fc66ca",
+      "red": true,
+      "red_target_failures": [
+        "EV-BE-1",
+        "EV-BE-2"
+      ],
+      "red_non_assertion_statuses": [],
+      "green": true,
+      "green_non_pass": [],
+      "red_detail": {
+        "REG-tests original baseline test suite passes": "pass",
+        "EV-BE-1 two simultaneous signups for the last seat: one confirmed, one waitlisted": "fail",
+        "EV-BE-2 more simultaneous signups than seats never overfill the event": "fail",
+        "PRIVATE (titles withheld)": {
+          "fail": 1,
+          "pass": 2
+        }
+      },
+      "grader_files_sha256": {
+        "lib.py": "9476603644862611c6dd915424a2ccb33260a6eb7c953d89e9f5e12179df4c3d",
+        "public_checks.py": "fc18f846dbd7d7fcda360fa31d01a44937dba53e34e3e167cacb649f5feb4543",
+        "private_checks.py": "22ae7a187ba05c63421d54d74666088a48b0998ca33b3c7dfd59a5be4a148596"
+      }
+    },
+    {
+      "task": "EV-INT",
+      "baseline_commit": "774bc9ae64ef16ad15718892c8a2eb2b32fc66ca",
+      "red": true,
+      "red_target_failures": [
+        "EV-INT-1",
+        "EV-INT-2"
+      ],
+      "red_non_assertion_statuses": [],
+      "green": true,
+      "green_non_pass": [],
+      "red_detail": {
+        "REG-tests original baseline test suite passes": "pass",
+        "EV-INT-1 cancelling a confirmed seat promotes the first waitlisted person": "fail",
+        "EV-INT-1 registration pages show the promotion after cancelling in the browser": "fail",
+        "EV-INT-2 repeat cancels and waitlisted cancels never promote extra people": "fail",
+        "EV-INT-2 cancelling with an empty waitlist just frees the seat": "pass",
+        "PRIVATE (titles withheld)": {
+          "fail": 3
+        }
+      },
+      "grader_files_sha256": {
+        "lib.py": "9476603644862611c6dd915424a2ccb33260a6eb7c953d89e9f5e12179df4c3d",
+        "public_checks.py": "04dacb8c9154e76dee7a642523b0ccdb70e9f71f02ae7db8439780b4b745cbca",
+        "private_checks.py": "0b531f7bc8ab0286e534d1b69704270b2f5ae1b82bb4537ef416543d87ab95e4"
+      }
+    }
+  ],
+  "note": "Second consecutive run; the first run after the final check edits gave the same red/green outcome. Private check titles are withheld because they are evaluator-only."
+}
