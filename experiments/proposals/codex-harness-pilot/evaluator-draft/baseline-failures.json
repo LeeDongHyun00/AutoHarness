@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1",
   "status": "draft_not_frozen",
-  "access_note": "Evaluator-side material. It names the intended defects, so it must never be copied into an exported baseline, a harness-generator input or a Codex workspace. Move it to the private evaluator repository once D4 is decided; a folder in this repository is not an access boundary.",
+  "access_note": "Evaluator-side material. It names the intended defects, so it must never be copied into an exported baseline, a harness-generator input or a Codex workspace. The owner chose to keep evaluator material in this public repository (D4, 2026-10-05).",
   "export_tool": "experiments/proposals/codex-harness-pilot/export_baseline.py",
   "projects": {
     "issue-tracker": {

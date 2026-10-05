@@ -1,7 +1,6 @@
 """Grade one submission for one pilot task.
 
-    python grade.py --task IT-BE --submission /path/to/workspace \
-        --private-dir /path/to/private-eval/codex-harness-pilot [--out result.json]
+    python grade.py --task IT-BE --submission /path/to/workspace [--out result.json]
 
 The submission is copied first so grading never touches the workspace. Its
 tests/ directory is replaced with the baseline's original tests, so editing or
@@ -27,6 +26,7 @@ TASKS = {
     "IT-FE": "issue-tracker", "IT-BE": "issue-tracker", "IT-INT": "issue-tracker",
     "EV-FE": "event-signup", "EV-BE": "event-signup", "EV-INT": "event-signup",
 }
+HIDDEN_DIR = EVALUATOR_DIR / "hidden"
 REGRESSION_TIMEOUT = 120
 COPY_IGNORE = shutil.ignore_patterns(".git", "__pycache__", "*.pyc", "*.db", "pilot_checks", "check_public.py")
 
@@ -105,7 +105,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--task", required=True, choices=sorted(TASKS))
     parser.add_argument("--submission", required=True)
-    parser.add_argument("--private-dir")
+    parser.add_argument("--private-dir", default=str(HIDDEN_DIR),
+                        help="directory holding tasks/<ID>/private_checks.py (default: evaluator-draft/hidden)")
     parser.add_argument("--out")
     args = parser.parse_args(argv)
     report = grade(args.task, Path(args.submission).resolve(), args.private_dir)

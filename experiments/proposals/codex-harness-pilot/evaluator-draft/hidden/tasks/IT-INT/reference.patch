@@ -1,0 +1,249 @@
+diff --git a/app/repository.py b/app/repository.py
+index d002aa7..8346fe0 100644
+--- a/app/repository.py
++++ b/app/repository.py
+@@ -8,8 +8,9 @@ SORT_SQL = {
+ 
+ ISSUE_SELECT = (
+     "SELECT i.id, i.project_id, i.title, i.description, i.status, i.reporter_id,"
+-    " r.name AS reporter_name, i.created_at, i.updated_at"
++    " r.name AS reporter_name, i.assignee_id, a.name AS assignee_name, i.created_at, i.updated_at"
+     " FROM issues i JOIN users r ON r.id = i.reporter_id"
++    " LEFT JOIN users a ON a.id = i.assignee_id"
+ )
+ 
+ 
+@@ -73,3 +74,7 @@ def insert_issue(conn, project_id, title, description, reporter_id, now):
+ 
+ def update_issue_status(conn, issue_id, status, now):
+     conn.execute("UPDATE issues SET status = ?, updated_at = ? WHERE id = ?", (status, now, issue_id))
++
++
++def update_issue_assignee(conn, issue_id, assignee_id, now):
++    conn.execute("UPDATE issues SET assignee_id = ?, updated_at = ? WHERE id = ?", (assignee_id, now, issue_id))
+diff --git a/app/schema.sql b/app/schema.sql
+index 8edc0af..b93ae9b 100644
+--- a/app/schema.sql
++++ b/app/schema.sql
+@@ -25,6 +25,7 @@ CREATE TABLE issues (
+   description TEXT NOT NULL DEFAULT '',
+   status TEXT NOT NULL CHECK (status IN ('open', 'in_progress', 'done')),
+   reporter_id INTEGER NOT NULL REFERENCES users(id),
++  assignee_id INTEGER REFERENCES users(id),
+   created_at TEXT NOT NULL,
+   updated_at TEXT NOT NULL
+ );
+diff --git a/app/server.py b/app/server.py
+index e15e1e2..a1ac439 100644
+--- a/app/server.py
++++ b/app/server.py
+@@ -56,6 +56,11 @@ def h_change_status(conn, user_id, params, query, body):
+     return 200, {"issue": issue}
+ 
+ 
++def h_assign_issue(conn, user_id, params, query, body):
++    issue = service.assign_issue(conn, user_id, params["key"], int(params["issue_id"]), body)
++    return 200, {"issue": issue}
++
++
+ ROUTES = [
+     ("GET", r"/api/me", h_me),
+     ("GET", r"/api/projects", h_projects),
+@@ -64,6 +69,7 @@ ROUTES = [
+     ("POST", r"/api/projects/(?P<key>[A-Z]+)/issues", h_create_issue),
+     ("GET", r"/api/projects/(?P<key>[A-Z]+)/issues/(?P<issue_id>\d+)", h_get_issue),
+     ("PATCH", r"/api/projects/(?P<key>[A-Z]+)/issues/(?P<issue_id>\d+)/status", h_change_status),
++    ("PATCH", r"/api/projects/(?P<key>[A-Z]+)/issues/(?P<issue_id>\d+)/assignee", h_assign_issue),
+ ]
+ COMPILED_ROUTES = [(method, re.compile(pattern), handler) for method, pattern, handler in ROUTES]
+ 
+diff --git a/app/service.py b/app/service.py
+index 2fa60c6..d10098f 100644
+--- a/app/service.py
++++ b/app/service.py
+@@ -35,6 +35,9 @@ def issue_to_dict(row):
+         "description": row["description"],
+         "status": row["status"],
+         "reporter": {"id": row["reporter_id"], "name": row["reporter_name"]},
++        "assignee": (
++            {"id": row["assignee_id"], "name": row["assignee_name"]} if row["assignee_id"] is not None else None
++        ),
+         "created_at": row["created_at"],
+         "updated_at": row["updated_at"],
+     }
+@@ -114,6 +117,25 @@ def create_issue(conn, user_id, project_key, payload):
+     return issue_to_dict(repository.get_issue(conn, project["id"], issue_id))
+ 
+ 
++def assign_issue(conn, user_id, project_key, issue_id, payload):
++    _, project = _project_access(conn, user_id, project_key, write=True)
++    if "assignee_id" not in payload:
++        raise BadRequest("assignee_id is required (use null to unassign)")
++    assignee_id = payload["assignee_id"]
++    # bool is a subclass of int; JSON true/false must not be read as user ids.
++    if assignee_id is not None and (not isinstance(assignee_id, int) or isinstance(assignee_id, bool)):
++        raise BadRequest("assignee_id must be an integer user id or null")
++    issue = _get_issue_or_404(conn, project, issue_id)
++    if assignee_id is not None:
++        assignee = repository.get_user(conn, assignee_id)
++        membership = repository.get_membership(conn, project["id"], assignee_id) if assignee else None
++        if assignee is None or not assignee["active"] or membership is None:
++            raise BadRequest("assignee must be an active member of this project")
++    repository.update_issue_assignee(conn, issue["id"], assignee_id, clock.now())
++    conn.commit()
++    return issue_to_dict(repository.get_issue(conn, project["id"], issue["id"]))
++
++
+ def change_status(conn, user_id, project_key, issue_id, payload):
+     _, project = _project_access(conn, user_id, project_key, write=True)
+     status = payload.get("status")
+diff --git a/static/api.js b/static/api.js
+index 6930d0f..0546cb2 100644
+--- a/static/api.js
++++ b/static/api.js
+@@ -49,4 +49,6 @@ export const api = {
+   getIssue: (projectKey, id) => request("GET", `${issuesPath(projectKey)}/${id}`),
+   createIssue: (projectKey, fields) => request("POST", issuesPath(projectKey), fields),
+   changeStatus: (projectKey, id, status) => request("PATCH", `${issuesPath(projectKey)}/${id}/status`, { status }),
++  assign: (projectKey, id, assigneeId) =>
++    request("PATCH", `${issuesPath(projectKey)}/${id}/assignee`, { assignee_id: assigneeId }),
+ };
+diff --git a/static/format.js b/static/format.js
+index 158472b..cfb2de9 100644
+--- a/static/format.js
++++ b/static/format.js
+@@ -9,6 +9,10 @@ export function formatDate(iso) {
+   return new Date(iso).toISOString().slice(0, 10);
+ }
+ 
++export function assigneeLabel(assignee) {
++  return assignee ? assignee.name : "Unassigned";
++}
++
+ export function showMessage(element, text) {
+   element.textContent = text;
+   element.hidden = !text;
+diff --git a/static/issue.html b/static/issue.html
+index 20f09c3..007d4d1 100644
+--- a/static/issue.html
++++ b/static/issue.html
+@@ -17,6 +17,15 @@
+       <h1 id="issue-title"></h1>
+       <p class="muted"><span id="issue-meta"></span></p>
+       <p id="issue-description"></p>
++      <p>Assignee: <strong id="issue-assignee"></strong></p>
++      <form id="assignee-form" class="inline-form">
++        <label for="assignee-select">Assign to</label>
++        <select id="assignee-select" name="assignee">
++          <option value="">Unassigned</option>
++        </select>
++        <button type="submit">Save assignee</button>
++      </form>
++      <p id="assignee-message" class="message error" role="alert" hidden></p>
+       <form id="status-form" class="inline-form">
+         <label for="status-select">Status</label>
+         <select id="status-select" name="status">
+diff --git a/static/issue.js b/static/issue.js
+index 9620491..6fbcf4c 100644
+--- a/static/issue.js
++++ b/static/issue.js
+@@ -1,5 +1,5 @@
+ import { api } from "./api.js";
+-import { formatDate, showMessage, statusLabel } from "./format.js";
++import { assigneeLabel, formatDate, showMessage, statusLabel } from "./format.js";
+ 
+ const params = new URLSearchParams(location.search);
+ const projectKey = params.get("project") || "CORE";
+@@ -16,14 +16,36 @@ const els = {
+   form: document.getElementById("status-form"),
+   select: document.getElementById("status-select"),
+   statusMessage: document.getElementById("status-message"),
++  assignee: document.getElementById("issue-assignee"),
++  assigneeForm: document.getElementById("assignee-form"),
++  assigneeSelect: document.getElementById("assignee-select"),
++  assigneeMessage: document.getElementById("assignee-message"),
+ };
+ 
++function renderMembers(members) {
++  // Only active members can be assigned, matching the server rule.
++  const options = members
++    .filter((member) => member.active)
++    .map((member) => {
++      const option = document.createElement("option");
++      option.value = String(member.id);
++      option.textContent = member.name;
++      return option;
++    });
++  const unassigned = document.createElement("option");
++  unassigned.value = "";
++  unassigned.textContent = "Unassigned";
++  els.assigneeSelect.replaceChildren(unassigned, ...options);
++}
++
+ function render(issue) {
+   document.title = issue.title;
+   els.title.textContent = issue.title;
+   els.meta.textContent = `#${issue.id} · ${statusLabel(issue.status)} · reported by ${issue.reporter.name} on ${formatDate(issue.created_at)}`;
+   els.description.textContent = issue.description || "No description.";
+   els.select.value = issue.status;
++  els.assignee.textContent = assigneeLabel(issue.assignee);
++  els.assigneeSelect.value = issue.assignee ? String(issue.assignee.id) : "";
+   els.article.hidden = false;
+ }
+ 
+@@ -34,8 +56,13 @@ async function load() {
+     return;
+   }
+   try {
+-    const [{ issue }, { user }] = await Promise.all([api.getIssue(projectKey, issueId), api.me()]);
++    const [{ issue }, { user }, { members }] = await Promise.all([
++      api.getIssue(projectKey, issueId),
++      api.me(),
++      api.members(projectKey),
++    ]);
+     els.userName.textContent = user.name;
++    renderMembers(members);
+     render(issue);
+   } catch (err) {
+     showMessage(els.message, err.message);
+@@ -53,4 +80,16 @@ els.form.addEventListener("submit", async (event) => {
+   }
+ });
+ 
++els.assigneeForm.addEventListener("submit", async (event) => {
++  event.preventDefault();
++  showMessage(els.assigneeMessage, "");
++  const value = els.assigneeSelect.value;
++  try {
++    const { issue } = await api.assign(projectKey, issueId, value ? Number(value) : null);
++    render(issue);
++  } catch (err) {
++    showMessage(els.assigneeMessage, err.message);
++  }
++});
++
+ load();
+diff --git a/static/list.js b/static/list.js
+index 3f70376..0613335 100644
+--- a/static/list.js
++++ b/static/list.js
+@@ -1,5 +1,5 @@
+ import { api, getUserId, setUserId } from "./api.js";
+-import { formatDate, showMessage, statusLabel } from "./format.js";
++import { assigneeLabel, formatDate, showMessage, statusLabel } from "./format.js";
+ 
+ const DEFAULT_PROJECT = "CORE";
+ const DEFAULTS = { status: "", sort: "created-desc" };
+@@ -51,7 +51,11 @@ function renderIssue(issue) {
+   badge.className = `badge status-${issue.status}`;
+   badge.textContent = statusLabel(issue.status);
+ 
+-  item.append(badge, link, meta);
++  const assignee = document.createElement("span");
++  assignee.className = "issue-assignee muted";
++  assignee.textContent = assigneeLabel(issue.assignee);
++
++  item.append(badge, link, meta, assignee);
+   return item;
+ }
+ 

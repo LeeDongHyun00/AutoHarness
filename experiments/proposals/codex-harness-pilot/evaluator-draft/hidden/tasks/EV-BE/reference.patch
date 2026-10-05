@@ -1,0 +1,44 @@
+diff --git a/app/registrations.py b/app/registrations.py
+index 4c11488..82fbebd 100644
+--- a/app/registrations.py
++++ b/app/registrations.py
+@@ -85,9 +85,10 @@ def get_event(conn, slug):
+ def register(conn, slug, payload):
+     event = _event_or_404(conn, slug)
+     fields = clean_fields(payload)
+-    confirmed = store.count_confirmed(conn, event["id"])
+-    status = "confirmed" if confirmed < event["capacity"] else "waitlisted"
++    store.begin_write(conn)
+     try:
++        confirmed = store.count_confirmed(conn, event["id"])
++        status = "confirmed" if confirmed < event["capacity"] else "waitlisted"
+         registration_id = store.insert_registration(
+             conn, event["id"], fields, status, secrets.token_urlsafe(16), clock.now()
+         )
+@@ -96,6 +97,9 @@ def register(conn, slug, payload):
+         raise ConflictError(
+             "this email already has an active registration for the event", code="already_registered"
+         )
++    except Exception:
++        conn.rollback()
++        raise
+     conn.commit()
+     return registration_to_dict(conn, store.get_registration(conn, registration_id), include_token=True)
+ 
+diff --git a/app/store.py b/app/store.py
+index c4627a1..5e3a8e1 100644
+--- a/app/store.py
++++ b/app/store.py
+@@ -59,6 +59,12 @@ def get_event(conn, slug):
+     ).fetchone()
+ 
+ 
++def begin_write(conn):
++    # Takes the database write lock up front so the seat count read below
++    # cannot be invalidated by a concurrent signup before we insert.
++    conn.execute("BEGIN IMMEDIATE")
++
++
+ def count_confirmed(conn, event_id):
+     return conn.execute(
+         "SELECT COUNT(*) FROM registrations WHERE event_id = ? AND status = 'confirmed'", (event_id,)

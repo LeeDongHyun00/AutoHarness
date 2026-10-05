@@ -1,0 +1,76 @@
+diff --git a/static/list.js b/static/list.js
+index 3f70376..1945420 100644
+--- a/static/list.js
++++ b/static/list.js
+@@ -3,6 +3,8 @@ import { formatDate, showMessage, statusLabel } from "./format.js";
+ 
+ const DEFAULT_PROJECT = "CORE";
+ const DEFAULTS = { status: "", sort: "created-desc" };
++const STATUS_VALUES = new Set(["", "open", "in_progress", "done"]);
++const SORT_VALUES = new Set(["created-desc", "created-asc", "title-asc"]);
+ 
+ const els = {
+   projectName: document.getElementById("project-name"),
+@@ -17,9 +19,26 @@ const els = {
+ };
+ 
+ const state = { projectKey: DEFAULT_PROJECT, ...DEFAULTS };
++// Responses can arrive out of order when the user navigates quickly; only the
++// latest request may render.
++let loadSequence = 0;
++
++// Unknown values in a shared or hand-edited link fall back to the defaults
++// independently, so one bad parameter does not discard the other.
++function readStateFromUrl() {
++  const params = new URLSearchParams(location.search);
++  const status = params.get("status") || DEFAULTS.status;
++  const sort = params.get("sort") || DEFAULTS.sort;
++  return {
++    projectKey: params.get("project") || DEFAULT_PROJECT,
++    status: STATUS_VALUES.has(status) ? status : DEFAULTS.status,
++    sort: SORT_VALUES.has(sort) ? sort : DEFAULTS.sort,
++  };
++}
+ 
+-function readProjectFromUrl() {
+-  return new URLSearchParams(location.search).get("project") || DEFAULT_PROJECT;
++function applyUrlState() {
++  Object.assign(state, readStateFromUrl());
++  syncControls();
+ }
+ 
+ function writeUrl() {
+@@ -56,12 +75,15 @@ function renderIssue(issue) {
+ }
+ 
+ async function loadIssues() {
++  const sequence = ++loadSequence;
+   showMessage(els.message, "");
+   try {
+     const { issues } = await api.listIssues(state.projectKey, state);
++    if (sequence !== loadSequence) return;
+     els.list.replaceChildren(...issues.map(renderIssue));
+     if (issues.length === 0) showMessage(els.message, "No issues match these filters.");
+   } catch (err) {
++    if (sequence !== loadSequence) return;
+     els.list.replaceChildren();
+     showMessage(els.message, err.message);
+   }
+@@ -115,10 +137,15 @@ els.form.addEventListener("submit", async (event) => {
+   }
+ });
+ 
++window.addEventListener("popstate", () => {
++  applyUrlState();
++  loadHeader();
++  loadIssues();
++});
++
+ function init() {
+-  state.projectKey = readProjectFromUrl();
++  applyUrlState();
+   els.user.value = getUserId();
+-  syncControls();
+   loadHeader();
+   loadIssues();
+ }

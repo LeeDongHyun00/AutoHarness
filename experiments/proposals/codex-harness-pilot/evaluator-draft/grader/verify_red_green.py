@@ -1,6 +1,6 @@
 """Check every task is red on its baseline and green with its reference patch.
 
-    python verify_red_green.py --private-dir /path/to/private-eval/codex-harness-pilot [--out summary.json]
+    python verify_red_green.py [--private-dir DIR] [--out summary.json]
 
 Red only counts when a target requirement fails as an assertion ("fail").
 Startup, infrastructure or harness errors do not satisfy red, and the
@@ -63,7 +63,7 @@ def verify(task, private_dir):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--private-dir", required=True)
+    parser.add_argument("--private-dir", default=str(grade.HIDDEN_DIR))
     parser.add_argument("--task", action="append", choices=sorted(grade.TASKS))
     parser.add_argument("--out")
     args = parser.parse_args(argv)

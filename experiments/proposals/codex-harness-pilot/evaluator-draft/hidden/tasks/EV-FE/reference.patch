@@ -1,0 +1,22 @@
+diff --git a/static/event.js b/static/event.js
+index e0e1b0f..096451c 100644
+--- a/static/event.js
++++ b/static/event.js
+@@ -75,12 +75,14 @@ els.form.addEventListener("submit", async (event) => {
+   try {
+     const { registration } = await client.register(slug, values);
+     showConfirmation(registration);
+-    els.submit.disabled = false;
+-    await refreshEvent();
++    // Only a successful signup clears the form; after a failure the user
++    // must be able to retry without retyping.
++    els.form.reset();
++    refreshEvent().catch(() => {});
+   } catch (err) {
+     setText(els.formError, describeError(err));
+   } finally {
+-    els.form.reset();
++    els.submit.disabled = false;
+   }
+ });
+ 

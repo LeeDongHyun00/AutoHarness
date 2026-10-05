@@ -1,0 +1,46 @@
+diff --git a/app/registrations.py b/app/registrations.py
+index 4c11488..d84e8c9 100644
+--- a/app/registrations.py
++++ b/app/registrations.py
+@@ -116,7 +116,15 @@ def cancel(conn, registration_id, token):
+     row = _registration_for_token(conn, registration_id, token)
+     if row["status"] == "cancelled":
+         return registration_to_dict(conn, row)
+-    store.mark_cancelled(conn, row["id"], clock.now())
++    now = clock.now()
++    # Cancel and promotion are committed together so a freed seat is never
++    # visible as empty while someone is still waiting for it.
++    store.mark_cancelled(conn, row["id"], now)
++    if row["status"] == "confirmed":
++        event = store.get_event(conn, row["event_slug"])
++        next_in_line = store.first_waitlisted(conn, row["event_id"])
++        if next_in_line is not None and store.count_confirmed(conn, row["event_id"]) < event["capacity"]:
++            store.mark_confirmed(conn, next_in_line["id"], now)
+     conn.commit()
+     return registration_to_dict(conn, store.get_registration(conn, row["id"]))
+ 
+diff --git a/app/store.py b/app/store.py
+index c4627a1..3940b2b 100644
+--- a/app/store.py
++++ b/app/store.py
+@@ -104,6 +104,20 @@ def mark_cancelled(conn, registration_id, now):
+     )
+ 
+ 
++def first_waitlisted(conn, event_id):
++    return conn.execute(
++        "SELECT id FROM registrations WHERE event_id = ? AND status = 'waitlisted'"
++        " ORDER BY waitlisted_at, id LIMIT 1",
++        (event_id,),
++    ).fetchone()
++
++
++def mark_confirmed(conn, registration_id, now):
++    conn.execute(
++        "UPDATE registrations SET status = 'confirmed', confirmed_at = ? WHERE id = ?", (now, registration_id)
++    )
++
++
+ def list_waitlist(conn, event_id):
+     return conn.execute(
+         "SELECT id, name, waitlisted_at FROM registrations"

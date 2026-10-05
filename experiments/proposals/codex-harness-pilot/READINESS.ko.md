@@ -42,7 +42,7 @@ W1 baseline 초안(`baselines/`)과 내보내기 도구(`export_baseline.py`)를
 | D1 | 구현 GPT 실행 환경 | Codex CLI + ChatGPT 구독 로그인 제안. 실제 계정에서 비대화형 실행 가능 여부, 모델 표시명·추론 설정, 승인·샌드박스 모드, 사용량 한도를 확인해야 함. 구독을 API처럼 쓸 수 있다고 가정하지 않음 | W4, W5, W7 |
 | D2 | 생성 모델 | 원 계획은 OpenRouter M1(저비용)·M2(균형). 실측 근거: OpenRouter `qwen/qwen3.8-27b:free` 67.19점(10/03), 로컬 Gemma 4 12B 61.04점(10/04, 입력·평가 달라 직접 비교 불가). 생성은 2회뿐이라 로컬 GPU도 가능하나 Colab 한도 이력이 있음 | W3 |
 | D3 | 합성 프로젝트 기술 스택 | 제안: Python 표준 라이브러리 HTTP 서버 + SQLite + 바닐라 JS, UI 검사는 Playwright. 설치가 가볍고 동시성·DB 검사를 재현하기 쉬움. 두 프로젝트 같은 스택 | W1, W2 |
-| D4 | 비공개 평가 자료 위치 | 별도 권한의 비공개 저장소 필요. 같은 저장소의 폴더·브랜치·ignore는 격리가 아님 | W2, W6 |
+| D4 | 비공개 평가 자료 위치 | **결정(2026-10-05): 공개 저장소에 둠.** 작업 공간·생성기 입력에서만 분리하므로, Codex 실행 환경의 네트워크로 이 저장소를 읽을 수 없게 해야 함 | W2, W5, W6 |
 | D5 | B 조건 범용 하네스 | 프로젝트와 무관한 구현·검증 지침 원문. 작성 주체와 C와 같은 토큰 상한 | W4 |
 | D6 | 실행당 예산 | 시간·토큰·수정 횟수 상한, 상한 도달 시 실패 처리 | W5 |
 | D7 | 사전 결정 규칙 | C−B 정량 문턱, 한 후보만 통과할 때의 규칙, 인프라 실패·재실행 한도·분모 처리 | W6 |
@@ -79,8 +79,7 @@ W1 baseline 초안(`baselines/`)과 내보내기 도구(`export_baseline.py`)를
 - [x] 과제별 사용자 요청 원문(`tasks/<ID>/request.ko.md`)과 요구사항 YAML(`requirements.yaml`, 노션 16.2 필드)
 - [x] 노션 16.3의 "새 제안" 규칙 확정: 상태 그래프와 응답 코드, 알 수 없는 필터값 독립 정규화, 대기 순서 tie-break(`waitlisted_at` → id), 대기 중 중복 클릭 1회 전송, 담당자 API 계약
 - [x] 공개 검사: 과제별 `public_checks.py`. baseline이 아니라 하네스 적용 후 작업 공간에 `tools/check_public.py`로 설치(생성기가 과제 목록을 보지 않게 하기 위해 원 설계에서 변경)
-- [x] 비공개 검사와 reference patch 작성. **저장소가 공개 상태이므로 커밋하지 않고** gitignore된 `private-eval/`에 로컬 보관 중
-- [ ] 비공개 자료를 비공개 저장소(D4)로 이전
+- [x] 비공개 검사와 reference patch 작성. D4 결정에 따라 공개 저장소 `evaluator-draft/hidden/`에 보관
 - [x] fixture 초기화(검사마다 새 DB), `APP_NOW` 고정, 동시성은 barrier 동시 시작 + SQL 지연 주입으로 실제 중첩 실행 확인
 - [x] timeout: 검사 120초, UI assertion 10초, 앱 기동 15초, 기존 테스트 120초. 기동 실패·인프라 실패·timeout·assertion 실패를 구분해 기록
 - [x] 과제 6개 모두 **baseline-red / reference-green** 자동 검증 통과(`grader/verify_red_green.py`, `red-green-2026-10-05.json`)

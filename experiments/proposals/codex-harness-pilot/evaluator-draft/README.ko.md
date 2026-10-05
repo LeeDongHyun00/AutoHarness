@@ -17,10 +17,13 @@ evaluator-draft/
     request.ko.md               Codex에 그대로 전달할 요청문
     requirements.yaml           요구사항 계약 (노션 16.2 필드)
     public_checks.py            공개 검사
+  hidden/tasks/<ID>/
+    private_checks.py           비공개 검사 (Codex 작업 공간에 넣지 않음)
+    reference.patch             reference 구현
   red-green-2026-10-05.json     검증 결과
 ```
 
-비공개 검사(`private_checks.py`)와 reference patch는 이 저장소에 **없습니다.** 저장소가 공개 상태라서 커밋하면 숨겨진 검사와 정답이 그대로 공개됩니다. 현재는 gitignore된 `private-eval/codex-harness-pilot/tasks/<ID>/`에 로컬로만 있으며, D4(비공개 평가 저장소)가 정해지면 그쪽으로 옮겨야 합니다. 이 컨테이너가 회수되면 사라지므로 이전이 급합니다.
+비공개 검사와 reference patch는 `hidden/`에 있습니다. 2026-10-05 사용자 결정(D4)으로 공개 저장소에 그대로 둡니다. 따라서 "비공개"는 **Codex 작업 공간과 하네스 생성기 입력에 넣지 않는다**는 뜻이지 접근 통제가 아닙니다. 모델이 인터넷에서 이 저장소를 찾아볼 수 있는 실행 환경이라면 숨겨진 검사가 새어 나갈 수 있으므로, W5에서 Codex 작업 공간의 네트워크 접근을 막거나 실행 로그로 이 저장소 접근 여부를 확인해야 합니다.
 
 ## 실행 흐름
 
@@ -31,7 +34,7 @@ evaluator-draft/
 5. 종료 후 작업 공간 밖에서 채점합니다.
 
 ```sh
-python grader/grade.py --task IT-BE --submission <workspace> --private-dir <private-eval>/codex-harness-pilot --out result.json
+python grader/grade.py --task IT-BE --submission <workspace> --out result.json
 ```
 
 ## 채점 규칙
@@ -49,7 +52,7 @@ python grader/grade.py --task IT-BE --submission <workspace> --private-dir <priv
 |---|---|---|---|
 | 공개 검사 위치 | baseline 저장소 안 `tools/check_public.py` | 하네스 적용 뒤 작업 공간에 설치 | baseline에 넣으면 생성기가 과제 목록과 검사 내용을 보게 됨 |
 | 공개 검사 명령 | `python3 tools/check_public.py --task TASK_ID` | `python tools/check_public.py` (`--task`는 선택) | 작업 공간마다 과제가 하나뿐 |
-| 비공개 검사 위치 | 비공개 평가 저장소 | 결정 전까지 로컬 `private-eval/` | D4 미정, 저장소 공개 상태 |
+| 비공개 검사 위치 | 별도 비공개 저장소 | 이 공개 저장소의 `hidden/` | 사용자 결정(D4). 작업 공간·생성기 입력에서만 분리 |
 
 ## 확정한 "새 제안" 규칙
 
