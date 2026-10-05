@@ -1,0 +1,271 @@
+{
+  "snippets": [
+    {
+      "path": "AGENTS.md",
+      "kind": "doc",
+      "file_sha256": "0357e74ba7f304d6f5b155a658d2729b3f02c8339fea0aa029c6c378902733ee",
+      "mode": "full",
+      "text": "# Notes for coding agents\n\nEvent signup service: events with a fixed capacity, confirmed seats and a waitlist.\n\n- Standard library only (Python 3.11+, SQLite). No npm, no bundler; the browser code in `static/` is plain ES modules.\n- `app/store.py` holds every SQL statement and never commits. `app/registrations.py` owns the rules and decides when to commit or roll back. `app/web.py` only parses requests and formats responses.\n- Error responses are `{\"detail\": \"...\", \"code\": \"...\"}` built from the classes in `app/errors.py`.\n- Run `python -m unittest discover -s tests -v` before finishing. Start the app with `python -m app --db /tmp/signup.db --init` (port 8100).\n",
+      "lines": [
+        1,
+        8
+      ],
+      "id": "E01"
+    },
+    {
+      "path": "README.md",
+      "kind": "doc",
+      "file_sha256": "af3f6e51eb3ea4d32753b7d83626da48e4dc1173bcbcb6f45d908a99d41344b9",
+      "mode": "full",
+      "text": "# Event Signup\n\nSign up for community events. Each event has a fixed capacity; once it is full, new signups join a waitlist.\n\n## Quick start\n\n```sh\npython -m app --db /tmp/signup.db --init\n```\n\nThen open http://127.0.0.1:8100/. `--init` creates the schema and demo events when the database file is new.\n\n## How signups work\n\n- A signup needs a name and a valid email; affiliation and notes are optional. Emails are stored lower-case.\n- While confirmed signups are below capacity, a new signup is `confirmed`. Otherwise it is `waitlisted`.\n- The waitlist is ordered by the time a person joined it (`waitlisted_at`), then by registration id.\n- An email can have only one active (`confirmed` or `waitlisted`) registration per event; a second attempt returns `409 already_registered`. After cancelling, the same email may sign up again.\n- Signing up returns a `token`. It is shown only once and is required (header `X-Registration-Token`) to view or cancel the registration. A wrong token and an unknown id both return `404 registration_not_found`.\n- Cancelling sets the status to `cancelled`. Cancelling an already cancelled registration succeeds without changes.\n\nDemo data: `spring-meetup` (capacity 3, 2 confirmed), `rust-workshop` (capacity 1, 1 confirmed, 2 waitlisted), `design-clinic` (capacity 2, empty). Seed tokens are `seed-token-<id>`.\n\n## API\n\n| Method | Path | Body / header | Result |\n|---|---|---|---|\n| GET | `/api/events` | | events with `seats_left`, `waitlist_count` |\n| GET | `/api/events/{slug}` | | one event |\n| GET | `/api/events/{slug}/waitlist` | | positions with masked names |\n| POST | `/api/events/{slug}/registrations` | `{\"name\", \"email\", \"affiliation\", \"note\"}` | `201` registration incl. `token` |\n| GET | `/api/registrations/{id}` | `X-Registration-Token` | registration incl. `waitlist_position` |\n| POST | `/api/registrations/{id}/cancel` | `X-Registration-Token` | updated registration |\n\nErrors: `{\"detail\": \"...\", \"code\": \"invalid_input|event_not_found|registration_not_found|already_registered|...\"}`.\n\n## Pages\n\n- `/` — event list\n- `/event.html?slug=...` — event details and signup form\n- `/registration.html?id=...&token=...` — registration status and cancellation\n\n## Tests\n\n```sh\npython -m unittest discover -s tests -v\n```\n",
+      "lines": [
+        1,
+        47
+      ],
+      "id": "E02"
+    },
+    {
+      "path": "app/schema.sql",
+      "kind": "schema",
+      "file_sha256": "4fc800b8600fda2621ae91dcbe6bb753ee207d7008b601e489242ff48d063823",
+      "mode": "full",
+      "text": "CREATE TABLE events (\n  id INTEGER PRIMARY KEY,\n  slug TEXT NOT NULL UNIQUE,\n  title TEXT NOT NULL,\n  starts_at TEXT NOT NULL,\n  capacity INTEGER NOT NULL CHECK (capacity >= 0)\n);\n\nCREATE TABLE registrations (\n  id INTEGER PRIMARY KEY,\n  event_id INTEGER NOT NULL REFERENCES events(id),\n  name TEXT NOT NULL,\n  email TEXT NOT NULL,\n  affiliation TEXT NOT NULL DEFAULT '',\n  note TEXT NOT NULL DEFAULT '',\n  status TEXT NOT NULL CHECK (status IN ('confirmed', 'waitlisted', 'cancelled')),\n  token TEXT NOT NULL,\n  created_at TEXT NOT NULL,\n  waitlisted_at TEXT,\n  confirmed_at TEXT,\n  cancelled_at TEXT\n);\n\n-- One active (confirmed or waitlisted) registration per email per event.\nCREATE UNIQUE INDEX uniq_active_registration\n  ON registrations(event_id, email) WHERE status != 'cancelled';\n\nCREATE INDEX idx_registrations_queue\n  ON registrations(event_id, status, waitlisted_at, id);\n",
+      "lines": [
+        1,
+        29
+      ],
+      "id": "E03"
+    },
+    {
+      "path": "app/__main__.py",
+      "kind": "source",
+      "file_sha256": "c48a888b924e552028e1726f5dbfe2ce0b1eaea5c8da140868e5d461ad2707a2",
+      "mode": "outline",
+      "text": "1: from .web import main",
+      "lines": [
+        1,
+        1
+      ],
+      "id": "E04"
+    },
+    {
+      "path": "app/clock.py",
+      "kind": "source",
+      "file_sha256": "136e43aeaf9cb1173a4ee7ba0d3c742b28c537c924b4f559948da1652992e53c",
+      "mode": "outline",
+      "text": "1: \"\"\"Single source of \"now\" so tests and fixtures can pin time with APP_NOW.\"\"\"\n3: import os\n4: from datetime import datetime, timezone\n7: def now() -> str:",
+      "lines": [
+        1,
+        7
+      ],
+      "id": "E05"
+    },
+    {
+      "path": "app/errors.py",
+      "kind": "source",
+      "file_sha256": "a9bb15790f6781024476641b8cf47222078ef01e276566d7bae97946db9154b6",
+      "mode": "outline",
+      "text": "1: \"\"\"Domain errors. handlers.py turns them into {\"detail\", \"code\"} responses.\"\"\"\n4: class SignupError(Exception):\n8:     def __init__(self, detail, code=None):\n15: class InvalidInput(SignupError):\n20: class NotFoundError(SignupError):\n25: class ConflictError(SignupError):",
+      "lines": [
+        1,
+        25
+      ],
+      "id": "E06"
+    },
+    {
+      "path": "app/registrations.py",
+      "kind": "source",
+      "file_sha256": "aa8fe44abf0737e93fd83e20efcc23ab786309e283b1a455c91e9382103958fc",
+      "mode": "outline",
+      "text": "1: \"\"\"Registration rules: capacity, waitlist and cancellation.\"\"\"\n3: import re\n4: import secrets\n6: from . import clock, store\n7: from .errors import ConflictError, InvalidInput, NotFoundError\n9: EMAIL_RE = re.compile(r\"^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$\")\n10: FIELD_LIMITS = {\"name\": 100, \"email\": 254, \"affiliation\": 100, \"note\": 500}\n13: def event_to_dict(row):\n26: def registration_to_dict(conn, row, include_token=False):\n50: def clean_fields(payload):\n70: def _event_or_404(conn, slug):\n77: def list_events(conn):\n81: def get_event(conn, slug):\n85: def register(conn, slug, payload):\n103: def _registration_for_token(conn, registration_id, token):\n111: def get_registration(conn, registration_id, token):\n115: def cancel(conn, registration_id, token):\n124: def waitlist(conn, slug):\n132: def _mask(name):",
+      "lines": [
+        1,
+        132
+      ],
+      "id": "E07"
+    },
+    {
+      "path": "app/seed.py",
+      "kind": "source",
+      "file_sha256": "efa2656a32ec419f6f3a16955adcf99ce5cce1ab30b24d52d14aa7d73f4759cd",
+      "mode": "outline",
+      "text": "1: \"\"\"Demo data used by `--init` and by the test suite.\"\"\"\n3: EVENTS = [\n4:     (1, \"spring-meetup\", \"Spring Community Meetup\", \"2026-11-20T18:00:00Z\", 3),\n5:     (2, \"rust-workshop\", \"Intro to Rust Workshop\", \"2026-11-22T10:00:00Z\", 1),\n6:     (3, \"design-clinic\", \"Design Review Clinic\", \"2026-11-25T14:00:00Z\", 2),\n7: ]\n10: REGISTRATIONS = [\n11:     (1, 1, \"Minji Seo\", \"minji@example.com\", \"Acme\", \"confirmed\", \"seed-token-1\", \"2026-10-01T09:00:00Z\"),\n12:     (2, 1, \"Junho Han\", \"junho@example.com\", \"\", \"confirmed\", \"seed-token-2\", \"2026-10-01T09:30:00Z\"),\n13:     (3, 2, \"Ara Yoon\", \"ara@example.com\", \"Globex\", \"confirmed\", \"seed-token-3\", \"2026-10-02T10:00:00Z\"),\n14:     (4, 2, \"Bora Kang\", \"bora@example.com\", \"\", \"waitlisted\", \"seed-token-4\", \"2026-10-02T10:05:00Z\"),\n19: def load(conn):",
+      "lines": [
+        1,
+        19
+      ],
+      "id": "E08"
+    },
+    {
+      "path": "app/store.py",
+      "kind": "source",
+      "file_sha256": "aeacd00d3c211b086e4be2f86d8918125ba41a6ca00c093bab4d88461be85708",
+      "mode": "outline",
+      "text": "1: \"\"\"SQLite access. Functions here run single statements and never commit;\n2: registrations.py decides where a unit of work ends.\"\"\"\n4: import sqlite3\n5: from pathlib import Path\n7: SCHEMA_PATH = Path(__file__).with_name(\"schema.sql\")\n9: REGISTRATION_COLUMNS = (\n10:     \"r.id, r.event_id, e.slug AS event_slug, e.title AS event_title, r.name, r.email,\"\n11:     \" r.affiliation, r.note, r.status, r.token, r.created_at, r.waitlisted_at,\"\n12:     \" r.confirmed_at, r.cancelled_at\"\n13: )\n16: class DuplicateRegistration(Exception):\n20: def connect(path):\n28: def init_db(path, seed=False):\n41: def list_events(conn):\n51: def get_event(conn, slug):\n62: def count_confirmed(conn, event_id):\n68: def insert_registration(conn, event_id, fields, status, token, now):\n94: def get_registration(conn, registration_id):\n101: def mark_cancelled(conn, registration_id, now):\n107: def list_waitlist(conn, event_id):\n115: def waitlist_position(conn, event_id, waitlisted_at, registration_id):",
+      "lines": [
+        1,
+        115
+      ],
+      "id": "E09"
+    },
+    {
+      "path": "app/web.py",
+      "kind": "source",
+      "file_sha256": "e3932939253eb1923171b4ef3f314ab60fe3ff44984aa909a4406ff1832ec2fc",
+      "mode": "outline",
+      "text": "1: \"\"\"HTTP server. Routes are registered with @route and return (status, body).\"\"\"\n3: import argparse\n4: import json\n5: import mimetypes\n6: import re\n7: from dataclasses import dataclass\n8: from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer\n9: from pathlib import Path\n10: from typing import Optional\n11: from urllib.parse import urlparse\n13: from . import registrations, store\n14: from .errors import InvalidInput, NotFoundError, SignupError\n16: STATIC_ROOT = (Path(__file__).resolve().parent.parent / \"static\").resolve()\n17: MAX_BODY = 32 * 1024\n18: TOKEN_HEADER = \"X-Registration-Token\"\n20: ROUTES = []\n23: def route(method, pattern):\n31: @dataclass\n32: class RequestContext:\n39: @route(\"GET\", r\"/api/events\")\n40: def list_events(ctx):\n44: @route(\"GET\", r\"/api/events/(?P<slug>[a-z0-9-]+)\")\n45: def get_event(ctx):\n49: @route(\"GET\", r\"/api/events/(?P<slug>[a-z0-9-]+)/waitlist\")\n50: def get_waitlist(ctx):\n54: @route(\"POST\", r\"/api/events/(?P<slug>[a-z0-9-]+)/registrations\")\n55: def create_registration(ctx):\n59: @route(\"GET\", r\"/api/registrations/(?P<registration_id>\\d+)\")\n60: def get_registration(ctx):\n65: @route(\"POST\", r\"/api/registrations/(?P<registration_id>\\d+)/cancel\")\n66: def cancel_registration(ctx):\n71: class SignupHandler(BaseHTTPRequestHandler):\n74:     def do_GET(self):\n77:     def do_POST(self):\n80:     def log_message(self, fmt, *args):\n84:     def handle_request(self, method):\n102:     def dispatch(self, method, path):\n115:     def read_body(self):\n128:     def serve_static(self, path):\n143:     def respond_error(self, err):\n146:     def respond(self, status, body):\n156: def create_server(db_path, host=\"127.0.0.1\", port=8100, verbose=False):\n163: def main(argv=None):",
+      "lines": [
+        1,
+        163
+      ],
+      "id": "E10"
+    },
+    {
+      "path": "static/client.js",
+      "kind": "source",
+      "file_sha256": "c77abc2bc5e0e4b59273edaa1dadc2fe0ee9bb2b9f6f52d4c6997fc7488d0993",
+      "mode": "outline",
+      "text": "3: export class RequestError extends Error {\n11: async function send(method, path, { body, token } = {}) {\n28: export const client = {",
+      "lines": [
+        3,
+        28
+      ],
+      "id": "E11"
+    },
+    {
+      "path": "static/event.js",
+      "kind": "source",
+      "file_sha256": "116492eeb84611dc330a3fcbe4ac476fc7229da2e05bb456c70f6f6b4156e043",
+      "mode": "outline",
+      "text": "1: import { client } from \"./client.js\";\n2: import { formatWhen, seatsSummary, setText, statusText } from \"./ui.js\";\n3: import { validateSignup } from \"./validation.js\";\n24: function readForm() {\n28: function showFieldErrors(errors) {\n36: function describeError(err) {\n42: function renderEvent(event) {\n51: function showConfirmation(registration) {\n61: async function refreshEvent() {\n66: els.form.addEventListener(\"submit\", async (event) => {\n87: async function init() {",
+      "lines": [
+        1,
+        87
+      ],
+      "id": "E12"
+    },
+    {
+      "path": "static/events.js",
+      "kind": "source",
+      "file_sha256": "08f8134608414b617bc167728ac3bba54d6031c9030980c602c762fce71980ff",
+      "mode": "outline",
+      "text": "1: import { client } from \"./client.js\";\n2: import { formatWhen, seatsSummary, setText } from \"./ui.js\";\n7: function renderEvent(event) {\n23: async function load() {",
+      "lines": [
+        1,
+        23
+      ],
+      "id": "E13"
+    },
+    {
+      "path": "static/registration.js",
+      "kind": "source",
+      "file_sha256": "83e705d89c795c37dc4d5a5f4c597e1afa21af80dc5488b33fb6e026ad8e6ebb",
+      "mode": "outline",
+      "text": "1: import { client } from \"./client.js\";\n2: import { setText, statusText } from \"./ui.js\";\n18: function render(registration) {\n29: els.cancel.addEventListener(\"click\", async () => {\n42: async function init() {",
+      "lines": [
+        1,
+        42
+      ],
+      "id": "E14"
+    },
+    {
+      "path": "static/ui.js",
+      "kind": "source",
+      "file_sha256": "202b33c171177b7ef305ea977c55eb454327c03b25497c7a1638df9c47b97af7",
+      "mode": "outline",
+      "text": "7: export function statusText(status) {\n11: export function formatWhen(iso) {\n15: export function setText(element, text) {\n20: export function seatsSummary(event) {",
+      "lines": [
+        7,
+        20
+      ],
+      "id": "E15"
+    },
+    {
+      "path": "static/validation.js",
+      "kind": "source",
+      "file_sha256": "76ea18d12d28c17d1a88db3784cc21cd82a72f161d3dbfc7aa08fae96f866078",
+      "mode": "outline",
+      "text": "5: export function validateSignup(values) {",
+      "lines": [
+        5,
+        5
+      ],
+      "id": "E16"
+    },
+    {
+      "path": "tests/fixtures.py",
+      "kind": "test",
+      "file_sha256": "0ce79767f49be8b9c137673d8ac6ee04e921a8e43e4d1dc0da39e4ab840943f7",
+      "mode": "outline",
+      "text": "1: import os\n2: import tempfile\n3: import threading\n4: import unittest\n5: from unittest import mock\n7: from app import store, web\n9: FIXED_NOW = \"2026-10-03T08:00:00Z\"\n12: class DatabaseCase(unittest.TestCase):\n13:     \"\"\"Each test gets its own seeded SQLite file and a pinned clock.\"\"\"\n15:     def setUp(self):\n27: class ServerCase(DatabaseCase):\n28:     def setUp(self):",
+      "lines": [
+        1,
+        28
+      ],
+      "id": "E17"
+    },
+    {
+      "path": "tests/test_registrations.py",
+      "kind": "test",
+      "file_sha256": "cacf5a705ec4a4f8bc45316eb3e8d15254a4644f80308a9bf3db974e9aa554e0",
+      "mode": "outline",
+      "text": "1: from app import registrations\n2: from app.errors import ConflictError, InvalidInput, NotFoundError\n4: from tests.fixtures import FIXED_NOW, DatabaseCase\n7: def signup(name, email, **extra):\n11: class RegisterTest(DatabaseCase):\n12:     def test_confirmed_while_seats_remain(self):\n20:     def test_waitlisted_when_full(self):\n26:     def test_fills_then_waitlists_in_order(self):\n32:     def test_email_is_normalised_and_fields_trimmed(self):\n38:     def test_duplicate_active_email_is_rejected(self):\n43:     def test_can_register_again_after_cancelling(self):\n48:     def test_validation(self):\n53:     def test_unknown_event(self):\n59: class ManageRegistrationTest(DatabaseCase):\n60:     def test_lookup_requires_matching_token(self):\n66:     def test_token_is_not_echoed_after_signup(self):\n69:     def test_cancel_frees_a_seat(self):\n75:     def test_cancel_twice_is_harmless(self):\n81:     def test_waitlist_positions_follow_join_order(self):\n85:     def test_public_waitlist_masks_names(self):",
+      "lines": [
+        1,
+        85
+      ],
+      "id": "E18"
+    },
+    {
+      "path": "tests/test_web.py",
+      "kind": "test",
+      "file_sha256": "b2580a4239c6e75ac5a489798da1a994262e90683dfe01f76058e5348cacaa71",
+      "mode": "outline",
+      "text": "1: import json\n2: import urllib.error\n3: import urllib.request\n5: from tests.fixtures import ServerCase\n8: class WebTest(ServerCase):\n9:     def fetch(self, method, path, body=None, token=None):\n21:     def test_list_events_with_seat_counts(self):\n27:     def test_signup_returns_201_and_token(self):\n36:     def test_errors_use_detail_and_code(self):\n42:     def test_duplicate_is_409(self):\n48:     def test_cancel_endpoint(self):\n52:     def test_cancel_with_wrong_token_is_404(self):\n56:     def test_static_index(self):\n60:     def test_static_traversal_is_rejected(self):",
+      "lines": [
+        1,
+        60
+      ],
+      "id": "E19"
+    },
+    {
+      "path": "static/event.html",
+      "kind": "markup",
+      "file_sha256": "83e461a529977fe4bde87118e1ca2d1d7d3d66020ab239911647d0daa97998e4",
+      "mode": "outline",
+      "text": "12:     <p id=\"event-status\" role=\"status\" hidden></p>\n13:     <section id=\"event-details\" hidden>\n14:       <h1 id=\"event-title\"></h1>\n15:       <p id=\"event-when\" class=\"muted\"></p>\n16:       <p id=\"event-seats\" class=\"seats\"></p>\n19:     <form id=\"signup-form\" class=\"signup-form\" novalidate hidden>\n23:         <input id=\"name\" name=\"name\" autocomplete=\"name\" required>\n28:         <input id=\"email\" name=\"email\" type=\"email\" autocomplete=\"email\" required>\n33:         <input id=\"affiliation\" name=\"affiliation\" autocomplete=\"organization\">\n38:         <textarea id=\"note\" name=\"note\" rows=\"3\"></textarea>\n41:       <p id=\"form-error\" class=\"form-error\" role=\"alert\" hidden></p>\n42:       <button id=\"submit-button\" type=\"submit\">Sign up</button>\n45:     <section id=\"confirmation\" class=\"confirmation\" hidden aria-live=\"polite\">\n46:       <h2 id=\"confirmation-title\"></h2>\n47:       <p id=\"confirmation-detail\"></p>\n48:       <a id=\"manage-link\" href=\"#\">View or cancel your registration</a>\n51:   <script type=\"module\" src=\"/event.js\"></script>",
+      "lines": [
+        12,
+        51
+      ],
+      "id": "E20"
+    },
+    {
+      "path": "static/index.html",
+      "kind": "markup",
+      "file_sha256": "9a81615b6b23b85e7e4c02604276aa0692aa4d6dea024a01d0da54415b0a3ee9",
+      "mode": "outline",
+      "text": "12:     <p id=\"events-status\" role=\"status\" hidden></p>\n13:     <ul id=\"event-list\" class=\"event-list\"></ul>\n15:   <script type=\"module\" src=\"/events.js\"></script>",
+      "lines": [
+        12,
+        15
+      ],
+      "id": "E21"
+    },
+    {
+      "path": "static/registration.html",
+      "kind": "markup",
+      "file_sha256": "152ed4912ae408d834d88937b29b69798e7881c5b98beef930444ec4556e2e8d",
+      "mode": "outline",
+      "text": "12:     <p id=\"registration-status\" role=\"status\" hidden></p>\n13:     <section id=\"registration\" hidden>\n14:       <h1 id=\"registration-event\"></h1>\n15:       <p>Status: <strong id=\"registration-state\"></strong></p>\n16:       <p id=\"registration-position\" hidden></p>\n17:       <button id=\"cancel-button\" type=\"button\">Cancel registration</button>\n18:       <p id=\"cancel-error\" class=\"form-error\" role=\"alert\" hidden></p>\n21:   <script type=\"module\" src=\"/registration.js\"></script>",
+      "lines": [
+        12,
+        21
+      ],
+      "id": "E22"
+    }
+  ],
+  "omitted": [],
+  "total_chars": 13406,
+  "max_total_chars": 30000
+}

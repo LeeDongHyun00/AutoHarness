@@ -1,0 +1,235 @@
+{
+  "snippets": [
+    {
+      "path": "AGENTS.md",
+      "kind": "doc",
+      "file_sha256": "620eca8473a2b941b30803f9c87cb39847301c51e87e15e1875f2f95a82becfe",
+      "mode": "full",
+      "text": "# AGENTS.md\n\nIssue tracker for small teams. Python standard library only — do not add third-party packages.\n\n## Layout\n\n- `app/server.py` — HTTP routing and JSON responses. Keep business rules out of it.\n- `app/service.py` — business rules and permission checks.\n- `app/repository.py` — the only module that contains SQL.\n- `app/schema.sql`, `app/seed.py` — schema and demo data (also used by tests).\n- `static/` — vanilla JavaScript ES modules, no build step.\n\n## Commands\n\n- Tests: `python -m unittest discover -s tests -v`\n- Run locally: `python -m app.server --db /tmp/issues.db --init`, then open http://127.0.0.1:8000/\n\n## Conventions\n\n- API errors use `{\"error\": {\"code\": ..., \"message\": ...}}`. Raise the matching class from `app/errors.py`; never build error responses by hand.\n- Timestamps are UTC ISO-8601 strings from `app.clock.now()`.\n",
+      "lines": [
+        1,
+        21
+      ],
+      "id": "E01"
+    },
+    {
+      "path": "README.md",
+      "kind": "doc",
+      "file_sha256": "27ddc03f3bf1d01dc293974263bd14c1a6a9c2f8c9ef9ed5fce2cc392ddfe27a",
+      "mode": "full",
+      "text": "# Issue Tracker\n\nA small issue tracker: projects, members with roles, and issues that move through a fixed lifecycle.\n\n## Running\n\n```sh\npython -m app.server --db /tmp/issues.db --init\n```\n\n`--init` creates the schema and demo data when the database file does not exist yet. Open http://127.0.0.1:8000/ and enter a user ID (demo users 1–5) in the header.\n\n## Users and permissions\n\nRequests identify the acting user with the `X-User-Id` header.\n\n| Role | Read issues | Create issues / change status |\n|---|---|---|\n| admin | yes | yes |\n| member | yes | yes |\n| viewer | yes | no |\n\n- Users who are not members of a project get `403`.\n- Deactivated users (`active = 0`) keep their history but cannot act: every request returns `401`.\n\nDemo data: Alice (CORE admin), Bob (CORE member), Carol (CORE viewer), Dave (CORE member, deactivated), Erin (OPS admin only).\n\n## Issue lifecycle\n\n```\nopen → in_progress → done\n```\n\nIssues only move forward one step at a time; they cannot skip a step or move backwards. Requesting the status an issue already has succeeds without changing it. Invalid moves return `409`.\n\n## API\n\n| Method | Path | Notes |\n|---|---|---|\n| GET | `/api/me` | Current user |\n| GET | `/api/projects` | Projects the user belongs to, with role |\n| GET | `/api/projects/{key}/members` | Members with role and active flag |\n| GET | `/api/projects/{key}/issues?status=&sort=` | `status`: `open`, `in_progress`, `done`; `sort`: `created-desc` (default), `created-asc`, `title-asc` |\n| POST | `/api/projects/{key}/issues` | `{\"title\", \"description\"}` → `201` |\n| GET | `/api/projects/{key}/issues/{id}` | Single issue |\n| PATCH | `/api/projects/{key}/issues/{id}/status` | `{\"status\"}` |\n\nErrors: `{\"error\": {\"code\": \"bad_request|unauthorized|forbidden|not_found|conflict\", \"message\": \"...\"}}`.\n\n## Frontend\n\n- `index.html` + `list.js` — issue list with status filter and sort; the URL carries the project and the selected filters.\n- `issue.html` + `issue.js` — issue detail and status change.\n- `api.js` — the only module that calls `fetch`.\n\n## Tests\n\n```sh\npython -m unittest discover -s tests -v\n```\n",
+      "lines": [
+        1,
+        60
+      ],
+      "id": "E02"
+    },
+    {
+      "path": "app/schema.sql",
+      "kind": "schema",
+      "file_sha256": "8183ece89c0fc720132ed1777339bbf649f1380ad99ee253286659b1da083ac2",
+      "mode": "full",
+      "text": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL,\n  email TEXT NOT NULL UNIQUE,\n  active INTEGER NOT NULL DEFAULT 1\n);\n\nCREATE TABLE projects (\n  id INTEGER PRIMARY KEY,\n  key TEXT NOT NULL UNIQUE,\n  name TEXT NOT NULL\n);\n\nCREATE TABLE project_members (\n  project_id INTEGER NOT NULL REFERENCES projects(id),\n  user_id INTEGER NOT NULL REFERENCES users(id),\n  role TEXT NOT NULL CHECK (role IN ('admin', 'member', 'viewer')),\n  PRIMARY KEY (project_id, user_id)\n);\n\nCREATE TABLE issues (\n  id INTEGER PRIMARY KEY,\n  project_id INTEGER NOT NULL REFERENCES projects(id),\n  title TEXT NOT NULL,\n  description TEXT NOT NULL DEFAULT '',\n  status TEXT NOT NULL CHECK (status IN ('open', 'in_progress', 'done')),\n  reporter_id INTEGER NOT NULL REFERENCES users(id),\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n);\n\nCREATE INDEX idx_issues_project_created ON issues(project_id, created_at);\n",
+      "lines": [
+        1,
+        32
+      ],
+      "id": "E03"
+    },
+    {
+      "path": "app/clock.py",
+      "kind": "source",
+      "file_sha256": "136e43aeaf9cb1173a4ee7ba0d3c742b28c537c924b4f559948da1652992e53c",
+      "mode": "outline",
+      "text": "1: \"\"\"Single source of \"now\" so tests and fixtures can pin time with APP_NOW.\"\"\"\n3: import os\n4: from datetime import datetime, timezone\n7: def now() -> str:",
+      "lines": [
+        1,
+        7
+      ],
+      "id": "E04"
+    },
+    {
+      "path": "app/db.py",
+      "kind": "source",
+      "file_sha256": "c2effbe8560aae75f506977dcb2dbf129f9cb0c8289645013cd6067e41c95d7e",
+      "mode": "outline",
+      "text": "1: import sqlite3\n2: from pathlib import Path\n4: SCHEMA_PATH = Path(__file__).with_name(\"schema.sql\")\n7: def connect(path):\n16: def init_db(path, seed=False):",
+      "lines": [
+        1,
+        16
+      ],
+      "id": "E05"
+    },
+    {
+      "path": "app/errors.py",
+      "kind": "source",
+      "file_sha256": "ce520be3e2d27f7c293439d898b5241e914efa201b342b7a9437a128e5956524",
+      "mode": "outline",
+      "text": "1: \"\"\"Errors raised by the service layer; server.py maps them to HTTP responses.\"\"\"\n4: class AppError(Exception):\n8:     def __init__(self, message):\n13: class BadRequest(AppError):\n18: class Unauthorized(AppError):\n23: class Forbidden(AppError):\n28: class NotFound(AppError):\n33: class Conflict(AppError):",
+      "lines": [
+        1,
+        33
+      ],
+      "id": "E06"
+    },
+    {
+      "path": "app/repository.py",
+      "kind": "source",
+      "file_sha256": "942f9d5398fe7d2afe106f9822afb5dfe70914d2468477d5bc8ad1363e4c6bd8",
+      "mode": "outline",
+      "text": "1: \"\"\"All SQL lives here; the service layer never builds queries itself.\"\"\"\n3: SORT_SQL = {\n4:     \"created-desc\": \"i.created_at DESC, i.id DESC\",\n5:     \"created-asc\": \"i.created_at ASC, i.id ASC\",\n6:     \"title-asc\": \"i.title COLLATE NOCASE ASC, i.id ASC\",\n7: }\n9: ISSUE_SELECT = (\n10:     \"SELECT i.id, i.project_id, i.title, i.description, i.status, i.reporter_id,\"\n11:     \" r.name AS reporter_name, i.created_at, i.updated_at\"\n12:     \" FROM issues i JOIN users r ON r.id = i.reporter_id\"\n13: )\n16: def get_user(conn, user_id):\n20: def get_project(conn, key):\n24: def list_projects_for_user(conn, user_id):\n33: def get_membership(conn, project_id, user_id):\n40: def list_members(conn, project_id):\n49: def list_issues(conn, project_id, status, sort):\n59: def get_issue(conn, project_id, issue_id):\n65: def insert_issue(conn, project_id, title, description, reporter_id, now):\n74: def update_issue_status(conn, issue_id, status, now):",
+      "lines": [
+        1,
+        74
+      ],
+      "id": "E07"
+    },
+    {
+      "path": "app/seed.py",
+      "kind": "source",
+      "file_sha256": "e7889fdfa669188e0423558a6a1ed0935302bc6ec446e53885ac5c897d98ed69",
+      "mode": "outline",
+      "text": "1: \"\"\"Demo data used by `--init` and by the test suite.\"\"\"\n3: USERS = [\n4:     (1, \"Alice Kim\", \"alice@example.com\", 1),\n5:     (2, \"Bob Lee\", \"bob@example.com\", 1),\n6:     (3, \"Carol Park\", \"carol@example.com\", 1),\n7:     (4, \"Dave Choi\", \"dave@example.com\", 0),\n11: PROJECTS = [\n12:     (1, \"CORE\", \"Core Platform\"),\n13:     (2, \"OPS\", \"Operations\"),\n14: ]\n16: MEMBERS = [\n17:     (1, 1, \"admin\"),\n18:     (1, 2, \"member\"),\n19:     (1, 3, \"viewer\"),\n20:     (1, 4, \"member\"),\n25: ISSUES = [\n26:     (1, 1, \"Login page shows blank screen on Safari\", \"Reported by two customers.\", \"open\", 2, \"2026-09-01T09:00:00Z\"),\n27:     (2, 1, \"Add CSV export for reports\", \"\", \"in_progress\", 1, \"2026-09-03T10:30:00Z\"),\n28:     (3, 1, \"Fix typo in onboarding email\", \"\", \"done\", 2, \"2026-09-04T08:15:00Z\"),\n29:     (4, 1, \"Rate limit password reset endpoint\", \"\", \"open\", 1, \"2026-09-10T14:00:00Z\"),\n38: def load(conn):",
+      "lines": [
+        1,
+        38
+      ],
+      "id": "E08"
+    },
+    {
+      "path": "app/server.py",
+      "kind": "source",
+      "file_sha256": "b497162bc20f8aa13e633ecc52c69dbec1aca0bdbd4766139a73c5505ce3dc6b",
+      "mode": "outline",
+      "text": "1: \"\"\"HTTP layer: routing, JSON encoding and error mapping. No business rules here.\"\"\"\n3: import argparse\n4: import json\n5: import mimetypes\n6: import re\n7: from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer\n8: from pathlib import Path\n9: from urllib.parse import parse_qs, urlparse\n11: from . import db, service\n12: from .errors import AppError, BadRequest, NotFound\n14: STATIC_DIR = (Path(__file__).resolve().parent.parent / \"static\").resolve()\n15: MAX_BODY = 64 * 1024\n18: def _first(query, name):\n23: def h_me(conn, user_id, params, query, body):\n27: def h_projects(conn, user_id, params, query, body):\n31: def h_members(conn, user_id, params, query, body):\n35: def h_list_issues(conn, user_id, params, query, body):\n46: def h_get_issue(conn, user_id, params, query, body):\n50: def h_create_issue(conn, user_id, params, query, body):\n54: def h_change_status(conn, user_id, params, query, body):\n59: ROUTES = [\n60:     (\"GET\", r\"/api/me\", h_me),\n61:     (\"GET\", r\"/api/projects\", h_projects),\n62:     (\"GET\", r\"/api/projects/(?P<key>[A-Z]+)/members\", h_members),\n63:     (\"GET\", r\"/api/projects/(?P<key>[A-Z]+)/issues\", h_list_issues),\n68: COMPILED_ROUTES = [(method, re.compile(pattern), handler) for method, pattern, handler in ROUTES]\n71: class Handler(BaseHTTPRequestHandler):\n74:     def do_GET(self):\n77:     def do_POST(self):\n80:     def do_PATCH(self):\n83:     def log_message(self, fmt, *args):\n87:     def _dispatch(self, method):\n105:     def _handle_api(self, method, parsed):\n117:     def _user_id(self):\n123:     def _read_json(self):\n136:     def _serve_static(self, path):\n153:     def _send_error(self, err):\n156:     def _send_json(self, status, payload):\n166: def make_server(db_path, host=\"127.0.0.1\", port=8000, verbose=False):\n173: def main(argv=None):",
+      "lines": [
+        1,
+        173
+      ],
+      "id": "E09"
+    },
+    {
+      "path": "app/service.py",
+      "kind": "source",
+      "file_sha256": "3b0d6b749deefafdcbf806b17897c50d23c3c6de9c795d895304c1b3ad9a8ba7",
+      "mode": "outline",
+      "text": "1: \"\"\"Business rules and permission checks.\n2: \n3: Every public function takes an open connection and the acting user id (from the\n4: X-User-Id header, or None when it is missing) and returns plain dicts that\n5: server.py serialises as-is.\n6: \"\"\"\n8: from . import clock, repository\n9: from .errors import BadRequest, Conflict, Forbidden, NotFound, Unauthorized\n11: STATUSES = (\"open\", \"in_progress\", \"done\")\n12: SORTS = tuple(repository.SORT_SQL)\n13: DEFAULT_SORT = \"created-desc\"\n16: ALLOWED_TRANSITIONS = {\n17:     \"open\": {\"in_progress\", \"done\"},\n18:     \"in_progress\": {\"done\"},\n19:     \"done\": set(),\n20: }\n22: WRITE_ROLES = {\"admin\", \"member\"}\n23: MAX_TITLE = 200\n24: MAX_DESCRIPTION = 5000\n27: def user_to_dict(row):\n31: def issue_to_dict(row):\n43: def current_user(conn, user_id):\n53: def _project_access(conn, user_id, project_key, write=False):\n66: def _get_issue_or_404(conn, project, issue_id):\n73: def list_my_projects(conn, user_id):\n81: def list_members(conn, user_id, project_key):\n88: def list_issues(conn, user_id, project_key, status=None, sort=DEFAULT_SORT):\n97: def get_issue(conn, user_id, project_key, issue_id):\n102: def create_issue(conn, user_id, project_key, payload):\n117: def change_status(conn, user_id, project_key, issue_id, payload):",
+      "lines": [
+        1,
+        117
+      ],
+      "id": "E10"
+    },
+    {
+      "path": "static/api.js",
+      "kind": "source",
+      "file_sha256": "aa52a31c88fb5dfb77b9f3523707a57c08da85b982e049d77acff54179133bcf",
+      "mode": "outline",
+      "text": "5: export function getUserId() {\n9: export function setUserId(id) {\n13: export class ApiError extends Error {\n21: export async function request(method, path, body) {\n37: const issuesPath = (projectKey) => `/api/projects/${encodeURIComponent(projectKey)}/issues`;\n39: export const api = {",
+      "lines": [
+        5,
+        39
+      ],
+      "id": "E11"
+    },
+    {
+      "path": "static/format.js",
+      "kind": "source",
+      "file_sha256": "1bc5a74339af7d1aaa8e41ee1a1cecf051a1b3663d76d151d46f6477183fb992",
+      "mode": "outline",
+      "text": "3: export function statusLabel(status) {\n8: export function formatDate(iso) {\n12: export function showMessage(element, text) {",
+      "lines": [
+        3,
+        12
+      ],
+      "id": "E12"
+    },
+    {
+      "path": "static/issue.js",
+      "kind": "source",
+      "file_sha256": "76ff347d99ec56981963234aa4b13a5d0beb19e0c9346c5b635788d71f4bd618",
+      "mode": "outline",
+      "text": "1: import { api } from \"./api.js\";\n2: import { formatDate, showMessage, statusLabel } from \"./format.js\";\n21: function render(issue) {\n30: async function load() {\n45: els.form.addEventListener(\"submit\", async (event) => {",
+      "lines": [
+        1,
+        45
+      ],
+      "id": "E13"
+    },
+    {
+      "path": "static/list.js",
+      "kind": "source",
+      "file_sha256": "6326c0fd694d591d4bb5660198e853b106f5c2e7ac590cdc3abb9e84d7b9248e",
+      "mode": "outline",
+      "text": "1: import { api, getUserId, setUserId } from \"./api.js\";\n2: import { formatDate, showMessage, statusLabel } from \"./format.js\";\n21: function readProjectFromUrl() {\n25: function writeUrl() {\n32: function syncControls() {\n37: function renderIssue(issue) {\n58: async function loadIssues() {\n70: async function loadHeader() {\n82: els.status.addEventListener(\"change\", () => {\n88: els.sort.addEventListener(\"change\", () => {\n94: els.user.addEventListener(\"change\", () => {\n101: els.form.addEventListener(\"submit\", async (event) => {\n118: function init() {",
+      "lines": [
+        1,
+        118
+      ],
+      "id": "E14"
+    },
+    {
+      "path": "tests/support.py",
+      "kind": "test",
+      "file_sha256": "4ad1a46142809d1e15febe814099f13cf6db97e659404769e05ee0624778fda9",
+      "mode": "outline",
+      "text": "1: import os\n2: import tempfile\n3: import threading\n4: import unittest\n6: from app import db, server\n9: class SeededDbTestCase(unittest.TestCase):\n10:     \"\"\"Fresh seeded database per test with time pinned through APP_NOW.\"\"\"\n14:     def setUp(self):\n25:     @staticmethod\n26:     def _restore_now(previous):\n33: class LiveServerTestCase(SeededDbTestCase):\n34:     def setUp(self):",
+      "lines": [
+        1,
+        34
+      ],
+      "id": "E15"
+    },
+    {
+      "path": "tests/test_api.py",
+      "kind": "test",
+      "file_sha256": "2bbbe2eaf553f9a5e7bf2d9440c38b679296257ca332bddda7ee69276aa8b49f",
+      "mode": "outline",
+      "text": "1: import json\n2: import urllib.error\n3: import urllib.request\n5: from tests.support import LiveServerTestCase\n8: class ApiTest(LiveServerTestCase):\n9:     def call(self, method, path, body=None, user_id=\"1\"):\n24:     def test_missing_user_header_uses_error_envelope(self):\n29:     def test_list_with_filter_and_sort(self):\n34:     def test_create_issue(self):\n39:     def test_backwards_transition_is_conflict(self):\n44:     def test_invalid_json_body(self):\n55:     def test_members_endpoint(self):\n61: class StaticFilesTest(LiveServerTestCase):\n62:     def test_index_is_served(self):\n66:     def test_path_traversal_is_rejected(self):",
+      "lines": [
+        1,
+        66
+      ],
+      "id": "E16"
+    },
+    {
+      "path": "tests/test_service.py",
+      "kind": "test",
+      "file_sha256": "5b4137cab27a4ec9eabd1f8e14192f360c019645d4e88f53fdd9d6ddbe07d0b2",
+      "mode": "outline",
+      "text": "1: from app import service\n2: from app.errors import BadRequest, Conflict, Forbidden, NotFound, Unauthorized\n4: from tests.support import SeededDbTestCase\n6: ALICE, BOB, CAROL, DAVE, ERIN = 1, 2, 3, 4, 5\n9: class ListIssuesTest(SeededDbTestCase):\n10:     def ids(self, **kwargs):\n13:     def test_default_sort_is_newest_first(self):\n16:     def test_status_filter(self):\n19:     def test_title_sort(self):\n22:     def test_rejects_unknown_status_and_sort(self):\n28:     def test_viewer_can_read(self):\n32: class AccessTest(SeededDbTestCase):\n33:     def test_missing_user_is_unauthorized(self):\n37:     def test_inactive_user_is_unauthorized(self):\n41:     def test_non_member_is_forbidden(self):\n45:     def test_unknown_project_is_not_found(self):\n49:     def test_issue_from_other_project_is_not_found(self):\n54: class CreateIssueTest(SeededDbTestCase):\n55:     def test_member_creates_open_issue(self):\n62:     def test_viewer_cannot_create(self):\n66:     def test_title_is_required(self):\n71: class ChangeStatusTest(SeededDbTestCase):\n72:     def status_of(self, issue_id):\n75:     def test_open_to_in_progress(self):\n80:     def test_in_progress_to_done(self):\n83:     def test_same_status_is_a_no_op(self):\n87:     def test_done_cannot_move_backwards(self):\n92:     def test_unknown_status_leaves_issue_unchanged(self):\n97:     def test_missing_issue(self):\n101:     def test_viewer_cannot_change_status(self):",
+      "lines": [
+        1,
+        101
+      ],
+      "id": "E17"
+    },
+    {
+      "path": "static/index.html",
+      "kind": "markup",
+      "file_sha256": "e5de27a90663ad9eb81b91743466e580960a42338f71eb0b4ec5f79ee397db9f",
+      "mode": "outline",
+      "text": "11:     <h1 id=\"project-name\">Issues</h1>\n13:       <input id=\"acting-user\" type=\"number\" min=\"1\" inputmode=\"numeric\">\n15:     <span id=\"user-name\" class=\"muted\"></span>\n18:     <section class=\"toolbar\" aria-label=\"Issue filters\">\n20:       <select id=\"status-filter\" name=\"status\">\n27:       <select id=\"sort-order\" name=\"sort\">\n33:     <p id=\"list-message\" class=\"message\" role=\"status\" hidden></p>\n34:     <ul id=\"issue-list\" class=\"issue-list\"></ul>\n36:     <section class=\"card\" aria-labelledby=\"new-issue-heading\">\n37:       <h2 id=\"new-issue-heading\">New issue</h2>\n38:       <form id=\"new-issue-form\" novalidate>\n40:         <input id=\"new-title\" name=\"title\" maxlength=\"200\" required>\n42:         <textarea id=\"new-description\" name=\"description\" rows=\"3\"></textarea>\n43:         <p id=\"form-message\" class=\"message error\" role=\"alert\" hidden></p>\n44:         <button type=\"submit\">Create issue</button>\n48:   <script type=\"module\" src=\"/list.js\"></script>",
+      "lines": [
+        11,
+        48
+      ],
+      "id": "E18"
+    },
+    {
+      "path": "static/issue.html",
+      "kind": "markup",
+      "file_sha256": "9066ade7ef0ce5c2f36680375a167976ad0cdd272902afb5e33029fa670ea4cc",
+      "mode": "outline",
+      "text": "11:     <a id=\"back-link\" href=\"/\">← All issues</a>\n12:     <span id=\"user-name\" class=\"muted\"></span>\n15:     <p id=\"issue-message\" class=\"message\" role=\"status\" hidden></p>\n16:     <article id=\"issue\" class=\"card\" hidden>\n17:       <h1 id=\"issue-title\"></h1>\n18:       <p class=\"muted\"><span id=\"issue-meta\"></span></p>\n19:       <p id=\"issue-description\"></p>\n20:       <form id=\"status-form\" class=\"inline-form\">\n22:         <select id=\"status-select\" name=\"status\">\n27:         <button type=\"submit\">Update status</button>\n29:       <p id=\"status-message\" class=\"message error\" role=\"alert\" hidden></p>\n32:   <script type=\"module\" src=\"/issue.js\"></script>",
+      "lines": [
+        11,
+        32
+      ],
+      "id": "E19"
+    }
+  ],
+  "omitted": [],
+  "total_chars": 14648,
+  "max_total_chars": 30000
+}

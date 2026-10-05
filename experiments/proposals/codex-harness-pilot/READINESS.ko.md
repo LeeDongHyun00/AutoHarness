@@ -87,17 +87,23 @@ W1 baseline 초안(`baselines/`)과 내보내기 도구(`export_baseline.py`)를
 
 ### W3. 하네스 생성기 최소판
 
-- [ ] `inspect`: baseline 커밋에서 `project.json`·`evidence.json` 생성(경로·심볼·파일 해시). 비밀·프로젝트 밖 파일 제외
-- [ ] `generate`: Gemma 4 12B를 Kaggle에서 호출(llama.cpp 서버), **JSON Schema 제약 출력**(10/05 교훈), 입력 묶음·요청·응답·사용량을 manifest에 기록
-- [ ] 생성기 입력에 과제 목록·요청·수용 조건·정답·비공개 검사가 없음을 manifest로 증명
-- [ ] `render`: 고정 템플릿으로 `AGENTS.md` 관리 영역 + 영역별 `SKILL.md`. 존재하는 영역만 생성
-- [ ] `validate`: schema, 경로 존재, 근거 해시 일치, 명령 출처(패키지 스크립트·CI), 규칙 충돌, 공통+선택 지침 3,000토큰 이내(실제 토크나이저 측정)
-- [ ] 10/04에 관측된 위험 패턴 검사: 홈 디렉터리·환경변수 접근, 원본 데이터 변형을 지시하는 규칙은 거부
-- [ ] 생성 실패도 실패로 기록, 대체 생성 금지
+상세: [`generation/README.ko.md`](generation/README.ko.md), 코드 `tools/harness/`
+
+- [x] `inspect`: `project.json`·`evidence.json` 생성(경로·파일 해시, 문서 전문 + 코드 outline). 비밀 파일 제외
+- [x] `request`: 질문답변형 프롬프트, 근거 ID enum을 쓴 평탄한 JSON Schema, 요청 해시 기록
+- [x] 생성기 입력에 과제 정보가 없음: baseline 스냅샷만 읽고 함수 본문은 넣지 않음
+- [x] `render`: 고정 템플릿으로 `AGENTS.md` 관리 블록 + 영역별 `SKILL.md`. 실제 근거가 있는 영역만 생성
+- [x] `validate`: strict JSON, schema, 근거 ID, 경로 존재, 명령 출처, 위험 지시 걸러내기, 토큰 추정 상한(글자 수/3 기준)
+- [x] 10/04에 관측된 위험 패턴(홈 디렉터리·환경변수 접근, 원본 변형 지시 등) 걸러내기
+- [x] 스키마 → 문법 변환을 고정 llama.cpp 커밋으로 확인
+- [x] Kaggle CLI 배치 커널 준비(`generation/kaggle-kernel/`)
+- [ ] **Kaggle에서 생성 실행(사용자)**, 결과 검증·렌더링
+- [ ] 실제 토크나이저로 하네스 크기 측정
+- [ ] 생성 실패도 실패로 기록, 대체 생성 금지 (규칙은 문서화됨)
 
 ### W4. 적용과 로딩 확인
 
-- [ ] 기존 `AGENTS.md` 보존 후 관리 영역 추가, 재적용 시 중복 없음, `revert`로 원상 복구
+- [x] 기존 `AGENTS.md` 보존 후 관리 영역 추가, 재적용 시 중복 없음, `revert`로 원상 복구 (`tools/harness` apply/revert, 오프라인 테스트로 확인)
 - [ ] Codex가 `AGENTS.md`를 읽는지, `SKILL.md`를 어떤 경로·참조로 읽게 할지 실제 계정에서 확인
 - [ ] 로딩 판정은 모델 자기 보고가 아니라 실행 로그의 파일 읽기·주입 증거로
 - [ ] B와 C의 지침 토큰 상한을 같게 하고 실제 길이 기록

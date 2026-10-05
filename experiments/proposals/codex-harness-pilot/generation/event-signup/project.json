@@ -1,0 +1,172 @@
+{
+  "name": "event-signup",
+  "commit": "774bc9ae64ef16ad15718892c8a2eb2b32fc66ca",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "0357e74ba7f304d6f5b155a658d2729b3f02c8339fea0aa029c6c378902733ee",
+      "bytes": 670,
+      "kind": "doc"
+    },
+    {
+      "path": "README.md",
+      "sha256": "af3f6e51eb3ea4d32753b7d83626da48e4dc1173bcbcb6f45d908a99d41344b9",
+      "bytes": 2273,
+      "kind": "doc"
+    },
+    {
+      "path": "app/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "kind": "source"
+    },
+    {
+      "path": "app/__main__.py",
+      "sha256": "c48a888b924e552028e1726f5dbfe2ce0b1eaea5c8da140868e5d461ad2707a2",
+      "bytes": 30,
+      "kind": "source"
+    },
+    {
+      "path": "app/clock.py",
+      "sha256": "136e43aeaf9cb1173a4ee7ba0d3c742b28c537c924b4f559948da1652992e53c",
+      "bytes": 318,
+      "kind": "source"
+    },
+    {
+      "path": "app/errors.py",
+      "sha256": "a9bb15790f6781024476641b8cf47222078ef01e276566d7bae97946db9154b6",
+      "bytes": 569,
+      "kind": "source"
+    },
+    {
+      "path": "app/registrations.py",
+      "sha256": "aa8fe44abf0737e93fd83e20efcc23ab786309e283b1a455c91e9382103958fc",
+      "bytes": 4577,
+      "kind": "source"
+    },
+    {
+      "path": "app/schema.sql",
+      "sha256": "4fc800b8600fda2621ae91dcbe6bb753ee207d7008b601e489242ff48d063823",
+      "bytes": 885,
+      "kind": "schema"
+    },
+    {
+      "path": "app/seed.py",
+      "sha256": "efa2656a32ec419f6f3a16955adcf99ce5cce1ab30b24d52d14aa7d73f4759cd",
+      "bytes": 1729,
+      "kind": "source"
+    },
+    {
+      "path": "app/store.py",
+      "sha256": "aeacd00d3c211b086e4be2f86d8918125ba41a6ca00c093bab4d88461be85708",
+      "bytes": 3904,
+      "kind": "source"
+    },
+    {
+      "path": "app/web.py",
+      "sha256": "e3932939253eb1923171b4ef3f314ab60fe3ff44984aa909a4406ff1832ec2fc",
+      "bytes": 6507,
+      "kind": "source"
+    },
+    {
+      "path": "static/client.js",
+      "sha256": "c77abc2bc5e0e4b59273edaa1dadc2fe0ee9bb2b9f6f52d4c6997fc7488d0993",
+      "bytes": 1448,
+      "kind": "source"
+    },
+    {
+      "path": "static/event.html",
+      "sha256": "83e461a529977fe4bde87118e1ca2d1d7d3d66020ab239911647d0daa97998e4",
+      "bytes": 2048,
+      "kind": "markup"
+    },
+    {
+      "path": "static/event.js",
+      "sha256": "116492eeb84611dc330a3fcbe4ac476fc7229da2e05bb456c70f6f6b4156e043",
+      "bytes": 3184,
+      "kind": "source"
+    },
+    {
+      "path": "static/events.js",
+      "sha256": "08f8134608414b617bc167728ac3bba54d6031c9030980c602c762fce71980ff",
+      "bytes": 1023,
+      "kind": "source"
+    },
+    {
+      "path": "static/index.html",
+      "sha256": "9a81615b6b23b85e7e4c02604276aa0692aa4d6dea024a01d0da54415b0a3ee9",
+      "bytes": 456,
+      "kind": "markup"
+    },
+    {
+      "path": "static/registration.html",
+      "sha256": "152ed4912ae408d834d88937b29b69798e7881c5b98beef930444ec4556e2e8d",
+      "bytes": 779,
+      "kind": "markup"
+    },
+    {
+      "path": "static/registration.js",
+      "sha256": "83e705d89c795c37dc4d5a5f4c597e1afa21af80dc5488b33fb6e026ad8e6ebb",
+      "bytes": 1614,
+      "kind": "source"
+    },
+    {
+      "path": "static/site.css",
+      "sha256": "8a66d377902d28fe8b70249eb702f8b77c3222012ae4de86560c049392a7e500",
+      "bytes": 1079,
+      "kind": null
+    },
+    {
+      "path": "static/ui.js",
+      "sha256": "202b33c171177b7ef305ea977c55eb454327c03b25497c7a1638df9c47b97af7",
+      "bytes": 596,
+      "kind": "source"
+    },
+    {
+      "path": "static/validation.js",
+      "sha256": "76ea18d12d28c17d1a88db3784cc21cd82a72f161d3dbfc7aa08fae96f866078",
+      "bytes": 759,
+      "kind": "source"
+    },
+    {
+      "path": "tests/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "kind": "test"
+    },
+    {
+      "path": "tests/fixtures.py",
+      "sha256": "0ce79767f49be8b9c137673d8ac6ee04e921a8e43e4d1dc0da39e4ab840943f7",
+      "bytes": 1097,
+      "kind": "test"
+    },
+    {
+      "path": "tests/test_registrations.py",
+      "sha256": "cacf5a705ec4a4f8bc45316eb3e8d15254a4644f80308a9bf3db974e9aa554e0",
+      "bytes": 4610,
+      "kind": "test"
+    },
+    {
+      "path": "tests/test_web.py",
+      "sha256": "b2580a4239c6e75ac5a489798da1a994262e90683dfe01f76058e5348cacaa71",
+      "bytes": 2933,
+      "kind": "test"
+    }
+  ],
+  "candidate_commands": [
+    {
+      "command": "python -m unittest discover -s tests -v",
+      "source": "AGENTS.md"
+    },
+    {
+      "command": "python -m app --db /tmp/signup.db --init",
+      "source": "AGENTS.md"
+    }
+  ],
+  "areas_present": [
+    "backend",
+    "data",
+    "frontend",
+    "testing"
+  ]
+}

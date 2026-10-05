@@ -1,0 +1,154 @@
+{
+  "name": "issue-tracker",
+  "commit": "f7d9a0dc2b89c93e30e20ff8758928d57bf7fc3b",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "620eca8473a2b941b30803f9c87cb39847301c51e87e15e1875f2f95a82becfe",
+      "bytes": 861,
+      "kind": "doc"
+    },
+    {
+      "path": "README.md",
+      "sha256": "27ddc03f3bf1d01dc293974263bd14c1a6a9c2f8c9ef9ed5fce2cc392ddfe27a",
+      "bytes": 2126,
+      "kind": "doc"
+    },
+    {
+      "path": "app/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "kind": "source"
+    },
+    {
+      "path": "app/clock.py",
+      "sha256": "136e43aeaf9cb1173a4ee7ba0d3c742b28c537c924b4f559948da1652992e53c",
+      "bytes": 318,
+      "kind": "source"
+    },
+    {
+      "path": "app/db.py",
+      "sha256": "c2effbe8560aae75f506977dcb2dbf129f9cb0c8289645013cd6067e41c95d7e",
+      "bytes": 663,
+      "kind": "source"
+    },
+    {
+      "path": "app/errors.py",
+      "sha256": "ce520be3e2d27f7c293439d898b5241e914efa201b342b7a9437a128e5956524",
+      "bytes": 602,
+      "kind": "source"
+    },
+    {
+      "path": "app/repository.py",
+      "sha256": "942f9d5398fe7d2afe106f9822afb5dfe70914d2468477d5bc8ad1363e4c6bd8",
+      "bytes": 2491,
+      "kind": "source"
+    },
+    {
+      "path": "app/schema.sql",
+      "sha256": "8183ece89c0fc720132ed1777339bbf649f1380ad99ee253286659b1da083ac2",
+      "bytes": 912,
+      "kind": "schema"
+    },
+    {
+      "path": "app/seed.py",
+      "sha256": "e7889fdfa669188e0423558a6a1ed0935302bc6ec446e53885ac5c897d98ed69",
+      "bytes": 1879,
+      "kind": "source"
+    },
+    {
+      "path": "app/server.py",
+      "sha256": "b497162bc20f8aa13e633ecc52c69dbec1aca0bdbd4766139a73c5505ce3dc6b",
+      "bytes": 7076,
+      "kind": "source"
+    },
+    {
+      "path": "app/service.py",
+      "sha256": "3b0d6b749deefafdcbf806b17897c50d23c3c6de9c795d895304c1b3ad9a8ba7",
+      "bytes": 4834,
+      "kind": "source"
+    },
+    {
+      "path": "static/api.js",
+      "sha256": "aa52a31c88fb5dfb77b9f3523707a57c08da85b982e049d77acff54179133bcf",
+      "bytes": 1890,
+      "kind": "source"
+    },
+    {
+      "path": "static/format.js",
+      "sha256": "1bc5a74339af7d1aaa8e41ee1a1cecf051a1b3663d76d151d46f6477183fb992",
+      "bytes": 421,
+      "kind": "source"
+    },
+    {
+      "path": "static/index.html",
+      "sha256": "e5de27a90663ad9eb81b91743466e580960a42338f71eb0b4ec5f79ee397db9f",
+      "bytes": 1870,
+      "kind": "markup"
+    },
+    {
+      "path": "static/issue.html",
+      "sha256": "9066ade7ef0ce5c2f36680375a167976ad0cdd272902afb5e33029fa670ea4cc",
+      "bytes": 1154,
+      "kind": "markup"
+    },
+    {
+      "path": "static/issue.js",
+      "sha256": "76ff347d99ec56981963234aa4b13a5d0beb19e0c9346c5b635788d71f4bd618",
+      "bytes": 1919,
+      "kind": "source"
+    },
+    {
+      "path": "static/list.js",
+      "sha256": "6326c0fd694d591d4bb5660198e853b106f5c2e7ac590cdc3abb9e84d7b9248e",
+      "bytes": 3743,
+      "kind": "source"
+    },
+    {
+      "path": "static/styles.css",
+      "sha256": "76bf4477e5d539fe13ed472802db43d5d1b688050a89a0a0d81720e355358577",
+      "bytes": 1477,
+      "kind": null
+    },
+    {
+      "path": "tests/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "kind": "test"
+    },
+    {
+      "path": "tests/support.py",
+      "sha256": "4ad1a46142809d1e15febe814099f13cf6db97e659404769e05ee0624778fda9",
+      "bytes": 1283,
+      "kind": "test"
+    },
+    {
+      "path": "tests/test_api.py",
+      "sha256": "2bbbe2eaf553f9a5e7bf2d9440c38b679296257ca332bddda7ee69276aa8b49f",
+      "bytes": 2906,
+      "kind": "test"
+    },
+    {
+      "path": "tests/test_service.py",
+      "sha256": "5b4137cab27a4ec9eabd1f8e14192f360c019645d4e88f53fdd9d6ddbe07d0b2",
+      "bytes": 4177,
+      "kind": "test"
+    }
+  ],
+  "candidate_commands": [
+    {
+      "command": "python -m unittest discover -s tests -v",
+      "source": "AGENTS.md"
+    },
+    {
+      "command": "python -m app.server --db /tmp/issues.db --init",
+      "source": "AGENTS.md"
+    }
+  ],
+  "areas_present": [
+    "backend",
+    "data",
+    "frontend",
+    "testing"
+  ]
+}
