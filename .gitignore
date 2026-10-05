@@ -38,3 +38,6 @@ artifacts/
 __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
+
+# Approved public development-pilot result archive only.
+!experiments/results/AutoHarness-Gemma4-improvement-pilot-results-2026-10-05.zip
